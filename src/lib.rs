@@ -12,11 +12,11 @@ impl KvStore {
         todo!()
     }
 
-    pub fn get(&self, key: String){
+    pub fn get(&self, key: String) -> Option<String>{
         todo!()
     }
 
-    pub fn remove(&self, ){
+    pub fn remove(&self, key: String) -> Option<String>{
         todo!();
     }
     
