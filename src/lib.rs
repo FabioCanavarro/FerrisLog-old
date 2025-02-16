@@ -1,24 +1,32 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 pub struct KvStore {
-
+    dict:HashMap<String,String>
 }
 
 impl KvStore {
     pub fn new() -> KvStore{
-        todo!()
+        KvStore{dict: HashMap::new()}
     }
 
-    pub fn set(&self, key: String, val: String){
-        todo!()
+    pub fn set(&mut self, key: String, val: String){
+        self.dict.insert(key, val);
     }
 
     pub fn get(&self, key: String) -> Option<String>{
-        todo!()
+        self.dict.get(&key).cloned()
+
     }
 
-    pub fn remove(&self, key: String) -> Option<String>{
-        todo!();
+    pub fn remove(&mut self, key: String){
+        self.dict.remove(&key);
     }
     
 }
 
+impl Default for KvStore{
+    fn default() -> Self {
+        KvStore::new()
+    }
+}

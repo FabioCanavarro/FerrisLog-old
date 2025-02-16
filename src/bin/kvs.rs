@@ -12,19 +12,33 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// does testing things
-    Set{key: String, val: String},
-    Get{key: String},
-    Remove{key:String}
+    set{key: String, val: String},
+    get{key: String},
+    rm{key:String}
 
 }
 
 fn main() {
     let cli = Cli::parse();
+    let mut store = kvs::KvStore::new();
     // Your implementation here
     match &cli.command.unwrap() {
-        Commands::Get { key } => println!("{}",key),
-        Commands::Remove { key } => todo!(),
-        Commands::Set { key, val } => todo!()
+        Commands::get { key } => {store.get(key.to_string());},
+        Commands::rm { key } => {println!("{}",key);store.remove(key.to_string());},
+        Commands::set { key, val } => {store.set(key.to_string(), val.to_string());}
         
+    }
+}
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn test_rm() {
+        let mut store = kvs::KvStore::new();
+        store.remove("sss".to_string());
+        
+ 
     }
 }
