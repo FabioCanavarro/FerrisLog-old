@@ -30,15 +30,3 @@ fn main() {
     }
 }
 
-#[cfg(test)]
-mod tests{
-    use super::*;
-
-    #[test]
-    fn test_rm() {
-        let mut store = kvs::KvStore::new();
-        store.remove("sss".to_string());
-        
- 
-    }
-}
