@@ -18,8 +18,6 @@ fn cli_version() {
         .stdout(contains(env!("CARGO_PKG_VERSION")));
 }
 
-
-
 #[test]
 fn cli_invalid_get() {
     Command::cargo_bin("kvs")
