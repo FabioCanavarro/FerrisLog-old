@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Debug)]
 pub struct KvStore {
@@ -23,6 +23,12 @@ impl KvStore {
     pub fn remove(&mut self, key: String) {
         self.dict.remove(&key);
     }
+
+    pub fn open<E>(path: impl Into<PathBuf>) -> Result<KvStore,E>{
+        todo!()
+    }
+
+
 }
 
 impl Default for KvStore {
