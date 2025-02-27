@@ -1,45 +1,68 @@
-use std::{collections::HashMap, path::PathBuf};
+use core::fmt;
+use std::{collections::HashMap, error::Error, fs::File, io::Write, path::{Path, PathBuf}};
+extern crate serde_json;
+extern crate serde;
 
-#[derive(env)]
+#[derive(Debug)]
 pub enum KvError{
     WriteError,
     ReadError,
 }
+
+impl fmt::Display for KvError{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self{
+            KvError::WriteError => writeln!(f,"Writing has failed!"),
+            KvError::ReadError => writeln!(f,"Reading has failed!")
+        }
+    }
+}
+
+
+impl Error for KvError{}
 
 pub type KvResult<T> = Result<T,crate::KvError>;
 
 
 #[derive(Debug)]
 pub struct KvStore {
-    dict: HashMap<String, String>,
+    pos: u64,
+    path: PathBuf,
 }
 
 impl KvStore {
     pub fn new() -> KvStore {
+        let _ = File::create("log.txt");
         KvStore {
-            dict: HashMap::new(),
+            pos: 0,
+            path: PathBuf::new(),
         }
     }
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()>{
-        self.dict.insert(key, val);
+        let cmd = Command::set(key, val);
+
+        let f = File::open("log.txt").unwrap();
+        
+
         Ok(())
     }
 
     pub fn get(&self, key: String) -> KvResult<Option<String>> {
-        Ok(self.dict.get(&key).cloned())
+        Ok(Some("".to_string()))    
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()>{
-        self.dict.remove(&key);
         Ok(())
     }
 
-    pub fn open(path: impl Into<PathBuf>) -> KvResult<KvStore>{
-        todo!()
+    pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore>{
+
+        let _ = File::create("log.txt");
+
+        Ok(KvStore{path:Into::into(path),pos:0})
+        
     }
-
-
 }
 
 impl Default for KvStore {
@@ -47,3 +70,58 @@ impl Default for KvStore {
         KvStore::new()
     }
 }
+
+enum Command{
+    Set{key:String,val:String},
+    Get{key:String},
+    Remove{key:String,val:String},
+}
+
+impl Command{
+    fn set(key: String, val: String) -> Command{
+        Command::Set { key, val }
+    }
+
+    fn get(key: String) -> Command{
+        Command::Get { key }
+    }
+
+    fn remove(key: String, val: String) -> Command{
+        Command::Remove { key, val }
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

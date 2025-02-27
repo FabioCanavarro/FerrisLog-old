@@ -180,6 +180,8 @@ fn cli_invalid_subcommand() {
 // Should get previously stored value.
 #[test]
 fn get_stored_value() -> Result<(), Box<dyn Error>> {
+    let temp_dir = TempDir::new().expect("unable to create temporary working directory");
+    let mut store = KvStore::open(temp_dir.path())?;
 
     store.set("key1".to_owned(), "value1".to_owned())?;
     store.set("key2".to_owned(), "value2".to_owned())?;
