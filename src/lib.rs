@@ -3,6 +3,17 @@ use std::{collections::HashMap, convert::TryInto, error::Error, fs::File, io::{B
 extern crate serde_json;
 extern crate serde;
 
+
+pub fn load_file(name: &str) -> Result<File, std::io::Error> {
+    File::options()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(name)
+        
+}
+
+
 #[derive(Debug)]
 pub enum KvError{
     WriteError,
@@ -41,10 +52,9 @@ impl KvStore {
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()>{
         let cmd = Command::set(key, val);
-
-        let mut f = File::open("log.txt").unwrap();
-        match f.write(b"{}"){
-            Ok(_) => {},
+        let mut f = load_file("log.txt").unwrap();
+        match f.write(b"{}njjefnjenfjenfjef"){
+            Ok(_) => {println!("Writing finish")},
             Err(_) => return Err(KvError::WriteError)
         }
         
