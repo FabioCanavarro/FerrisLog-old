@@ -1,10 +1,10 @@
 use core::fmt;
-use std::{error::Error, fs::File, io::{Seek, SeekFrom, Write}, path::{Path, PathBuf}};
+use std::{error::Error, fs::File, io::{Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr};
 extern crate serde_json;
 extern crate serde;
 
 
-pub fn load_file(name: &str) -> Result<File, std::io::Error> {
+pub fn load_file(name: &PathBuf) -> Result<File, std::io::Error> {
     File::options()
         .read(true)
         .append(true)
@@ -42,19 +42,22 @@ pub struct KvStore {
 
 impl KvStore {
     pub fn new() -> KvStore {
-        let _ = File::create("log.txt");
+        match File::open("log.txt"){
+            Ok(_) => {},
+            Err(_) => {let _ = File::create("log.txt");}
+        }
+        let f = File::open("log.txt").unwrap();
         KvStore {
             pos: 0,
-            path: PathBuf::new(),
+            path: PathBuf::from_str("log.txt").unwrap(),
         }
     }
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()>{
         let cmd = Command::set(key, val);
-        let mut f = load_file("log.txt").unwrap();
-        let _ = f.seek(SeekFrom::End(0)).unwrap();
+        let mut f = load_file(&self.path).unwrap();
         let _ = serde_json::to_writer(&mut f, &cmd);
-               
+              
         Ok(())
     }
 
