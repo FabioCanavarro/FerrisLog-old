@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{error::Error, fs::File, io::{Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr};
+use std::{collections::HashMap, error::Error, fs::File, io::{Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr};
 extern crate serde_json;
 extern crate serde;
 
@@ -38,6 +38,7 @@ pub type KvResult<T> = Result<T,crate::KvError>;
 pub struct KvStore {
     pos: u64,
     path: PathBuf,
+    map: HashMap<String,(String,i32,i32)>
 }
 
 impl KvStore {
@@ -46,16 +47,19 @@ impl KvStore {
             Ok(_) => {},
             Err(_) => {let _ = File::create("log.txt");}
         }
-        let f = File::open("log.txt").unwrap();
+        let mut f = File::open("log.txt").unwrap();
         KvStore {
-            pos: 0,
+            pos: f.seek(SeekFrom::End(0)).unwrap(),
             path: PathBuf::from_str("log.txt").unwrap(),
+            map: HashMap::new()
         }
     }
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()>{
         let cmd = Command::set(key, val);
         let mut f = load_file(&self.path).unwrap();
+        let start_pos = self.pos;
+        let end_pos = serde_json::to_string(&cmd);
         let _ = serde_json::to_writer(&mut f, &cmd);
               
         Ok(())
@@ -70,12 +74,12 @@ impl KvStore {
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore>{
-        match File::open("log.txt"){
+        match File::open(path){
             Ok(_) => {},
             Err(_) => {let _ = File::create("log.txt");}
         }
-
-        Ok(KvStore{path:Into::into(path),pos:0})
+        let mut f = File::open(path).unwrap();
+        Ok(KvStore{path:Into::into(path),pos:f.seek(SeekFrom::End(0)).unwrap(),map: HashMap::new()}) // ! todo hashmap 
         
     }
 }
@@ -90,7 +94,7 @@ impl Default for KvStore {
 enum Command{
     Set{key:String,val:String},
     Get{key:String},
-    Remove{key:String,val:String},
+    Remove{key:String},
 }
 
 impl Command{
@@ -102,31 +106,11 @@ impl Command{
         Command::Get { key }
     }
 
-    fn remove(key: String, val: String) -> Command{
-        Command::Remove { key, val }
+    fn remove(key: String) -> Command{
+        Command::Remove { key }
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
