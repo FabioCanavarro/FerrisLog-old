@@ -97,9 +97,9 @@ enum Command{
 impl fmt::Display for Command{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self{
-            Self::Set { key, val } => writeln!(f,"{}",format!("Set {} {}", key, val)),
-            Self::Get { key } => writeln!(f,"{}",format!("Get {}",key)),
-            Self::Remove { key, val } => writeln!(f,"{}",format!("Remove {} {}",key,val))
+            Self::Set { key, val } => writeln!(f,"set {} {}", key, val),
+            Self::Get { key } => writeln!(f,"Get {}",key),
+            Self::Remove { key, val } => writeln!(f,"Remove {} {}",key,val)
         }
     }
 }
