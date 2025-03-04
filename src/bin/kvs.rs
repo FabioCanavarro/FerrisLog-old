@@ -36,9 +36,7 @@ fn main() {
             store.remove(key.to_string());
         }
         Commands::set { key, val } => {
-            println!("set");
-            let e = store.set(key.to_string(), val.to_string());
-            println!("{:?}",e);
+            store.set(key.to_string(), val.to_string());
 
         }
     }

@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{error::Error, fs::File, io::Write, path::{Path, PathBuf}};
+use std::{error::Error, fs::File, io::{Seek, SeekFrom, Write}, path::{Path, PathBuf}};
 extern crate serde_json;
 extern crate serde;
 
@@ -7,8 +7,7 @@ extern crate serde;
 pub fn load_file(name: &str) -> Result<File, std::io::Error> {
     File::options()
         .read(true)
-        .write(true)
-        .create(true)
+        .append(true)
         .open(name)
         
 }
@@ -53,12 +52,9 @@ impl KvStore {
     pub fn set(&mut self, key: String, val: String) -> KvResult<()>{
         let cmd = Command::set(key, val);
         let mut f = load_file("log.txt").unwrap();
-        match f.write(&format!("{:?}",cmd).into_bytes()){
-            Ok(_) => {println!("Writing finish")},
-            Err(_) => return Err(KvError::WriteError)
-        }
-        
-
+        let _ = f.seek(SeekFrom::End(0)).unwrap();
+        let _ = serde_json::to_writer(&mut f, &cmd);
+               
         Ok(())
     }
 
@@ -87,21 +83,11 @@ impl Default for KvStore {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,serde::Serialize)]
 enum Command{
     Set{key:String,val:String},
     Get{key:String},
     Remove{key:String,val:String},
-}
-
-impl fmt::Display for Command{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self{
-            Self::Set { key, val } => writeln!(f,"set {} {}", key, val),
-            Self::Get { key } => writeln!(f,"Get {}",key),
-            Self::Remove { key, val } => writeln!(f,"Remove {} {}",key,val)
-        }
-    }
 }
 
 impl Command{
