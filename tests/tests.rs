@@ -105,7 +105,6 @@ fn cli_rm_stored() -> Result<(), Box<dyn Error>> {
         .assert()
         .success()
         .stdout(is_empty());
-    
 
     Command::cargo_bin("kvs")
         .unwrap()

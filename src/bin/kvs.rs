@@ -37,7 +37,6 @@ fn main() {
         }
         Commands::set { key, val } => {
             store.set(key.to_string(), val.to_string());
-
         }
     }
 }
