@@ -35,9 +35,9 @@ pub type KvResult<T> = Result<T, crate::KvError>;
 
 #[derive(Debug)]
 pub struct KvStore {
-    pos: u64,
     path: PathBuf,
-    map: HashMap<String, (String, i32, i32)>,
+    table: HashMap<String,LogPosition>
+
 }
 
 impl KvStore {
@@ -50,18 +50,24 @@ impl KvStore {
         }
         let mut f = File::open("log.txt").unwrap();
         KvStore {
-            pos: f.seek(SeekFrom::End(0)).unwrap(),
             path: PathBuf::from_str("log.txt").unwrap(),
-            map: HashMap::new(),
+            table: HashMap::new()
         }
     }
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
-        let cmd = Command::set(key, val);
+        let cmd = Command::set(key.clone(), val);
         let mut f = load_file(&self.path).unwrap();
-        let start_pos = self.pos;
-        let end_pos = serde_json::to_string(&cmd);
+        let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
+        let end_pos = f.seek(SeekFrom::End(0));
+        if self.table.contains_key(&key){
+            let gen = self.table.get_key_value(&key).unwrap().1.gen + 1;
+            self.table.insert(key, LogPosition { gen , start: start_pos.unwrap(), end: end_pos.unwrap() });
+        }
+        else {
+            self.table.insert(key, LogPosition { gen: 1, start: start_pos.unwrap(), end: end_pos.unwrap() });
+        }
 
         Ok(())
     }
@@ -84,9 +90,8 @@ impl KvStore {
         let mut f = File::open(path).unwrap();
         Ok(KvStore {
             path: Into::into(path),
-            pos: f.seek(SeekFrom::End(0)).unwrap(),
-            map: HashMap::new(),
-        }) // ! todo hashmap
+            table: HashMap::new()
+        })
     }
 }
 
@@ -116,3 +121,32 @@ impl Command {
         Command::Remove { key }
     }
 }
+
+
+
+#[derive(Debug)]
+struct LogPosition{
+    gen: u64,
+    start: u64,
+    end: u64
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
