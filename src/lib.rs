@@ -36,8 +36,7 @@ pub type KvResult<T> = Result<T, crate::KvError>;
 #[derive(Debug)]
 pub struct KvStore {
     path: PathBuf,
-    table: HashMap<String,LogPosition>
-
+    table: HashMap<String, LogPosition>,
 }
 
 impl KvStore {
@@ -51,7 +50,7 @@ impl KvStore {
         let mut f = File::open("log.txt").unwrap();
         KvStore {
             path: PathBuf::from_str("log.txt").unwrap(),
-            table: HashMap::new()
+            table: HashMap::new(),
         }
     }
 
@@ -61,12 +60,25 @@ impl KvStore {
         let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
-        if self.table.contains_key(&key){
+        if self.table.contains_key(&key) {
             let gen = self.table.get_key_value(&key).unwrap().1.gen + 1;
-            self.table.insert(key, LogPosition { gen , start: start_pos.unwrap(), end: end_pos.unwrap() });
-        }
-        else {
-            self.table.insert(key, LogPosition { gen: 1, start: start_pos.unwrap(), end: end_pos.unwrap() });
+            self.table.insert(
+                key,
+                LogPosition {
+                    gen,
+                    start: start_pos.unwrap(),
+                    end: end_pos.unwrap(),
+                },
+            );
+        } else {
+            self.table.insert(
+                key,
+                LogPosition {
+                    gen: 1,
+                    start: start_pos.unwrap(),
+                    end: end_pos.unwrap(),
+                },
+            );
         }
 
         Ok(())
@@ -90,7 +102,7 @@ impl KvStore {
         let mut f = File::open(path).unwrap();
         Ok(KvStore {
             path: Into::into(path),
-            table: HashMap::new()
+            table: HashMap::new(),
         })
     }
 }
@@ -122,31 +134,9 @@ impl Command {
     }
 }
 
-
-
 #[derive(Debug)]
-struct LogPosition{
+struct LogPosition {
     gen: u64,
     start: u64,
-    end: u64
+    end: u64,
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
