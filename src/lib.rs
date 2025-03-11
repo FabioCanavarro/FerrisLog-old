@@ -18,6 +18,7 @@ pub fn load_file(name: &PathBuf) -> Result<File, std::io::Error> {
 pub enum KvError {
     WriteError,
     ReadError,
+    OpenError
 }
 
 impl fmt::Display for KvError {
@@ -40,16 +41,9 @@ pub struct KvStore {
 }
 
 impl KvStore {
-    pub fn new() -> KvStore {
-        match File::open("log.txt") {
-            Ok(_) => {}
-            Err(_) => {
-                let _ = File::create("log.txt");
-            }
-        }
-        let mut f = File::open("log.txt").unwrap();
+    pub fn new(path: PathBuf) -> KvStore {
         KvStore {
-            path: PathBuf::from_str("log.txt").unwrap(),
+            path,
             table: HashMap::new(),
         }
     }
@@ -57,7 +51,7 @@ impl KvStore {
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
         let cmd = Command::set(key.clone(), val);
         let mut f = load_file(&self.path).unwrap();
-        let start_pos = f.seek(SeekFrom::End(0));
+        /* let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
         if self.table.contains_key(&key) {
@@ -79,7 +73,7 @@ impl KvStore {
                     end: end_pos.unwrap(),
                 },
             );
-        }
+        } */
 
         Ok(())
     }
@@ -93,23 +87,17 @@ impl KvStore {
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
-        match File::open(path) {
-            Ok(_) => {}
-            Err(_) => {
-                let _ = File::create("log.txt");
-            }
-        }
-        let mut f = File::open(path).unwrap();
+        let mut f = match File::open(path) {
+            Ok(f) => {f},
+            Err(_) => return Err(KvError::OpenError)
+        };
+        let hash: HashMap<String, String> = HashMap::new();
+        
+         
         Ok(KvStore {
             path: Into::into(path),
             table: HashMap::new(),
         })
-    }
-}
-
-impl Default for KvStore {
-    fn default() -> Self {
-        KvStore::new()
     }
 }
 
