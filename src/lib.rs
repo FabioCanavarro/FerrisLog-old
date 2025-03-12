@@ -3,10 +3,11 @@ use std::{
     collections::HashMap,
     error::Error,
     fs::File,
-    io::{Seek, SeekFrom, Write},
+    io::BufReader,
     path::{Path, PathBuf},
-    str::FromStr,
 };
+
+use serde::Deserialize;
 extern crate serde;
 extern crate serde_json;
 
@@ -14,18 +15,21 @@ pub fn load_file(name: &PathBuf) -> Result<File, std::io::Error> {
     File::options().read(true).append(true).open(name)
 }
 
-#[derive(Debug)]
+#[derive(Debug,Deserialize)]
 pub enum KvError {
     WriteError,
     ReadError,
-    OpenError
+    OpenError,
+    ParseError
 }
 
 impl fmt::Display for KvError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self {
+        match self {
             KvError::WriteError => writeln!(f, "Writing has failed!"),
             KvError::ReadError => Ok(()),
+            KvError::OpenError => writeln!(f,"Opening has failed!"),
+            KvError::ParseError => writeln!(f,"Parsing has failed!"),
         }
     }
 }
@@ -51,6 +55,8 @@ impl KvStore {
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
         let cmd = Command::set(key.clone(), val);
         let mut f = load_file(&self.path).unwrap();
+
+        let _ = serde_json::to_writer(&mut f, &cmd);
         /* let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
@@ -92,8 +98,23 @@ impl KvStore {
             Err(_) => return Err(KvError::OpenError)
         };
         let hash: HashMap<String, String> = HashMap::new();
-        
-         
+        let buffer = BufReader::new(&f);
+        let temp: Result<Command, serde_json::Error> = serde_json::from_reader(buffer);
+        println!("{:?}",&temp);
+        let commands = match temp {
+            Ok(commands) => commands,
+            Err(_) => return Err(KvError::ParseError),
+        };
+        println!("{:?}",commands);
+        for i in commands{
+            match i {
+                Command::Set { key, val } => println!("{key},{val}"),
+                _ => ()
+            }
+        }
+
+
+
         Ok(KvStore {
             path: Into::into(path),
             table: HashMap::new(),
@@ -101,7 +122,7 @@ impl KvStore {
     }
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize,serde::Deserialize)]
 enum Command {
     Set { key: String, val: String },
     Get { key: String },
