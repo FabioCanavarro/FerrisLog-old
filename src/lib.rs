@@ -15,12 +15,12 @@ pub fn load_file(name: &PathBuf) -> Result<File, std::io::Error> {
     File::options().read(true).append(true).open(name)
 }
 
-#[derive(Debug,Deserialize)]
+#[derive(Debug, Deserialize)]
 pub enum KvError {
     WriteError,
     ReadError,
     OpenError,
-    ParseError
+    ParseError,
 }
 
 impl fmt::Display for KvError {
@@ -28,8 +28,8 @@ impl fmt::Display for KvError {
         match self {
             KvError::WriteError => writeln!(f, "Writing has failed!"),
             KvError::ReadError => Ok(()),
-            KvError::OpenError => writeln!(f,"Opening has failed!"),
-            KvError::ParseError => writeln!(f,"Parsing has failed!"),
+            KvError::OpenError => writeln!(f, "Opening has failed!"),
+            KvError::ParseError => writeln!(f, "Parsing has failed!"),
         }
     }
 }
@@ -94,26 +94,25 @@ impl KvStore {
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
         let mut f = match File::open(path) {
-            Ok(f) => {f},
-            Err(_) => return Err(KvError::OpenError)
+            Ok(f) => f,
+            Err(_) => return Err(KvError::OpenError),
         };
         let hash: HashMap<String, String> = HashMap::new();
         let buffer = BufReader::new(&f);
         let temp: Result<Command, serde_json::Error> = serde_json::from_reader(buffer);
-        println!("{:?}",&temp);
+        println!("{:?}", &temp);
         let commands = match temp {
             Ok(commands) => commands,
             Err(_) => return Err(KvError::ParseError),
         };
-        println!("{:?}",commands);
-        for i in commands{
+        println!("{:?}", commands);
+        // For write we make vector from commmands we print vec to file
+        for i in commands {
             match i {
                 Command::Set { key, val } => println!("{key},{val}"),
-                _ => ()
+                _ => (),
             }
         }
-
-
 
         Ok(KvStore {
             path: Into::into(path),
@@ -122,7 +121,7 @@ impl KvStore {
     }
 }
 
-#[derive(Debug, serde::Serialize,serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 enum Command {
     Set { key: String, val: String },
     Get { key: String },
