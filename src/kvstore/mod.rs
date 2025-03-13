@@ -34,7 +34,7 @@ impl KvStore {
             .unwrap();
 
         let _ = serde_json::to_writer(&mut f, &cmd);
-        f.write_all(b"\n");
+        let _ = f.write_all(b"\n");
         /* let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
@@ -68,11 +68,11 @@ impl KvStore {
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
-        Ok(())
+        todo!()
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
-        let mut f = match File::open(path) {
+        let f = match File::open(path) {
             Ok(f) => f,
             Err(_) => return Err(KvError::OpenError),
         };
@@ -80,16 +80,13 @@ impl KvStore {
         let buffer = BufReader::new(&f);
 
         let temp = serde_json::Deserializer::from_reader(buffer);
-        let mut stream = temp.into_iter::<Command>();
+        let stream = temp.into_iter::<Command>();
 
         // For write we make vector from commmands we print vec to file
 
         for i in stream {
-            match i.unwrap() {
-                Command::Set { key, val } => {
-                    hash.insert(key, val);
-                }
-                _ => (),
+            if let Command::Set { key, val } = i.unwrap() {
+                hash.insert(key, val);
             }
         }
         Ok(KvStore {
