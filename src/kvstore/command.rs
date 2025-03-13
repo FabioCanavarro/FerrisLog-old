@@ -1,7 +1,6 @@
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub enum Command {
     Set { key: String, val: String },
-    Get { key: String },
     Remove { key: String },
 }
 

@@ -96,9 +96,10 @@ impl KvStore {
         // For write we make vector from commmands we print vec to file
 
         for i in stream {
-            if let Command::Set { key, val } = i.unwrap() {
-                hash.insert(key, val);
-            }
+            match i.unwrap(){
+                Command::Set { key, val } => {hash.insert(key, val);},
+                Command::Remove { key } => {hash.remove(&key);},
+            };
         }
         Ok(KvStore {
             path: Into::into(path),
