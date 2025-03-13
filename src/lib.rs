@@ -3,11 +3,12 @@ use std::{
     collections::HashMap,
     error::Error,
     fs::File,
-    io::BufReader,
+    io::{BufReader, Write},
     path::{Path, PathBuf},
 };
 
 use serde::Deserialize;
+use serde_json::error;
 extern crate serde;
 extern crate serde_json;
 
@@ -57,6 +58,7 @@ impl KvStore {
         let mut f = load_file(&self.path).unwrap();
 
         let _ = serde_json::to_writer(&mut f, &cmd);
+        f.write_all(b"\n");
         /* let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
@@ -99,21 +101,24 @@ impl KvStore {
         };
         let hash: HashMap<String, String> = HashMap::new();
         let buffer = BufReader::new(&f);
-        let temp: Result<Command, serde_json::Error> = serde_json::from_reader(buffer);
-        println!("{:?}", &temp);
-        let commands = match temp {
+
+        let temp = serde_json::Deserializer::from_reader(buffer);
+        let mut stream = temp.into_iter::<Command>();
+        // let temp: Result<Command, serde_json::Error> = serde_json::from_reader(buffer);
+        println!("{:?}", &stream.next());
+        /* let commands = match temp {
             Ok(commands) => commands,
             Err(_) => return Err(KvError::ParseError),
         };
-        println!("{:?}", commands);
+
+        println!("{:?}", &commands);
         // For write we make vector from commmands we print vec to file
         for i in commands {
             match i {
                 Command::Set { key, val } => println!("{key},{val}"),
                 _ => (),
             }
-        }
-
+        }*/
         Ok(KvStore {
             path: Into::into(path),
             table: HashMap::new(),
