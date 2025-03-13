@@ -1,5 +1,5 @@
 use assert_cmd::prelude::*;
-use kvs::KvStore;
+use kvs::kvstore::KvStore;
 use predicates::ord::eq;
 use predicates::str::{contains, is_empty, PredicateStrExt};
 use std::error::Error;
