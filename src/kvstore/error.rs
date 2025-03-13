@@ -1,6 +1,6 @@
-use std::fmt;
-use std::error::Error;
 use serde::Deserialize;
+use std::error::Error;
+use std::fmt;
 #[derive(Debug, Deserialize)]
 pub enum KvError {
     WriteError,
@@ -21,6 +21,5 @@ impl fmt::Display for KvError {
 }
 
 impl Error for KvError {}
-
 
 pub type KvResult<T> = Result<T, KvError>;

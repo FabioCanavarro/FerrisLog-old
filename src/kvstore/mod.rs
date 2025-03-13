@@ -4,12 +4,11 @@ use std::{
     io::{BufReader, Write},
     path::{Path, PathBuf},
 };
-pub mod error;
 pub mod command;
+pub mod error;
 
 use command::Command;
-use error::{KvResult,KvError};
-
+use error::{KvError, KvResult};
 
 #[derive(Debug)]
 pub struct KvStore {
@@ -28,7 +27,11 @@ impl KvStore {
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
         let cmd = Command::set(key.clone(), val);
 
-        let mut f = File::options().read(true).append(true).open(&self.path).unwrap();
+        let mut f = File::options()
+            .read(true)
+            .append(true)
+            .open(&self.path)
+            .unwrap();
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         f.write_all(b"\n");
@@ -80,10 +83,12 @@ impl KvStore {
         let mut stream = temp.into_iter::<Command>();
 
         // For write we make vector from commmands we print vec to file
-        
+
         for i in stream {
             match i.unwrap() {
-                Command::Set { key, val } => {hash.insert(key, val);},
+                Command::Set { key, val } => {
+                    hash.insert(key, val);
+                }
                 _ => (),
             }
         }
@@ -93,4 +98,3 @@ impl KvStore {
         })
     }
 }
-
