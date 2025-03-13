@@ -104,21 +104,15 @@ impl KvStore {
 
         let temp = serde_json::Deserializer::from_reader(buffer);
         let mut stream = temp.into_iter::<Command>();
-        // let temp: Result<Command, serde_json::Error> = serde_json::from_reader(buffer);
         println!("{:?}", &stream.next());
-        /* let commands = match temp {
-            Ok(commands) => commands,
-            Err(_) => return Err(KvError::ParseError),
-        };
 
-        println!("{:?}", &commands);
         // For write we make vector from commmands we print vec to file
-        for i in commands {
-            match i {
+        for i in stream {
+            match i.unwrap() {
                 Command::Set { key, val } => println!("{key},{val}"),
                 _ => (),
             }
-        }*/
+        }
         Ok(KvStore {
             path: Into::into(path),
             table: HashMap::new(),
