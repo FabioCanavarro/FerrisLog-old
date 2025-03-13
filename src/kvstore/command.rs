@@ -9,10 +9,6 @@ impl Command {
     pub fn set(key: String, val: String) -> Command {
         Command::Set { key, val }
     }
-
-    fn remove(key: String) -> Command {
-        Command::Remove { key }
-    }
 }
 
 #[derive(Debug)]
