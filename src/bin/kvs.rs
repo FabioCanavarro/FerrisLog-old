@@ -33,7 +33,10 @@ fn main() {
     match &cli.command.unwrap() {
         Commands::get { key } => {
             let val = store.get(key.to_string());
-            println!("{}",val.unwrap().unwrap())
+            match val.unwrap(){
+                Some(d) => println!("{}",d),
+                None => println!("Key not found")
+            }
         }
         Commands::rm { key } => {
             println!("{}", key);
