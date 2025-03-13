@@ -68,7 +68,18 @@ impl KvStore {
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
-        todo!()
+        let cmd = Command::rm(key.clone());
+
+        let mut f = File::options()
+            .read(true)
+            .append(true)
+            .open(&self.path)
+            .unwrap();
+
+        let _ = serde_json::to_writer(&mut f, &cmd);
+        let _ = f.write_all(b"\n");
+
+        Ok(())
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
