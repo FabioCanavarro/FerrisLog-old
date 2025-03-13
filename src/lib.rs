@@ -42,7 +42,7 @@ pub type KvResult<T> = Result<T, crate::KvError>;
 #[derive(Debug)]
 pub struct KvStore {
     path: PathBuf,
-    table: HashMap<String, LogPosition>,
+    table: HashMap<String, String>,
 }
 
 impl KvStore {
@@ -87,7 +87,8 @@ impl KvStore {
     }
 
     pub fn get(&self, key: String) -> KvResult<Option<String>> {
-        Ok(Some("".to_string()))
+        let val = self.table.get(&key);
+        Ok(val.cloned())
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
@@ -99,23 +100,23 @@ impl KvStore {
             Ok(f) => f,
             Err(_) => return Err(KvError::OpenError),
         };
-        let hash: HashMap<String, String> = HashMap::new();
+        let mut hash: HashMap<String, String> = HashMap::new();
         let buffer = BufReader::new(&f);
 
         let temp = serde_json::Deserializer::from_reader(buffer);
         let mut stream = temp.into_iter::<Command>();
-        println!("{:?}", &stream.next());
 
         // For write we make vector from commmands we print vec to file
+        
         for i in stream {
             match i.unwrap() {
-                Command::Set { key, val } => println!("{key},{val}"),
+                Command::Set { key, val } => {hash.insert(key, val);},
                 _ => (),
             }
         }
         Ok(KvStore {
             path: Into::into(path),
-            table: HashMap::new(),
+            table: hash,
         })
     }
 }

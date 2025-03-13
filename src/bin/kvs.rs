@@ -28,12 +28,12 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
-    let mut store = kvs::KvStore::new(PathBuf::from("log.txt"));
-    KvStore::open(&PathBuf::from("log.txt"));
+    let mut store = KvStore::open(&PathBuf::from("log.txt")).unwrap();
     // Your implementation here
     match &cli.command.unwrap() {
         Commands::get { key } => {
-            store.get(key.to_string());
+            let val = store.get(key.to_string());
+            println!("{}",val.unwrap().unwrap())
         }
         Commands::rm { key } => {
             println!("{}", key);
