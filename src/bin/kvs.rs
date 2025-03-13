@@ -1,8 +1,8 @@
 extern crate clap;
-use std::{fs::File, path::PathBuf};
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use kvs::KvStore;
+use kvs::kvstore::KvStore;
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -13,7 +13,6 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// does testing things
     set {
         key: String,
         val: String,
