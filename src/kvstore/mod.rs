@@ -2,7 +2,7 @@ use std::{
     collections::HashMap,
     env::current_dir,
     fs::File,
-    io::{BufReader, Write},
+    io::{BufReader, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
 };
 pub mod command;
@@ -34,40 +34,26 @@ impl KvStore {
             .open(&self.path)
             .unwrap();
 
+        let start_pos = f.seek(SeekFrom::End(0)).unwrap();
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-
-        todo!();
-        /* let start_pos = f.seek(SeekFrom::End(0));
-        let _ = serde_json::to_writer(&mut f, &cmd);
-        let end_pos = f.seek(SeekFrom::End(0));
-        if self.table.contains_key(&key) {
-            let gen = self.table.get_key_value(&key).unwrap().1.gen + 1;
-            self.table.insert(
-                key,
-                LogPosition {
-                    gen,
-                    start: start_pos.unwrap(),
-                    end: end_pos.unwrap(),
-                },
-            );
-        } else {
-            self.table.insert(
-                key,
-                LogPosition {
-                    gen: 1,
-                    start: start_pos.unwrap(),
-                    end: end_pos.unwrap(),
-                },
-            );
-        } */
+        self.table.insert(
+            key,
+            start_pos
+        );
 
         Ok(())
     }
 
     pub fn get(&self, key: String) -> KvResult<Option<String>> {
         let val = self.table.get(&key);
-        Ok(val.cloned())
+        let mut f = File::options()
+            .read(true)
+            .append(true)
+            .open(&self.path)
+            .unwrap();
+
+        // Seek from val to the \n
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
@@ -86,7 +72,7 @@ impl KvStore {
 
         todo!();
 
-
+        let res = Some(1);
 
         match res {
             Some(_) => Ok(()),
@@ -111,8 +97,7 @@ impl KvStore {
         // For write we make vector from commmands we print vec to file
         for i in stream {
             match i.unwrap() {
-                Command::Set { key, val } => {
-                    todo!()
+                Command::Set { key, val } => {()
                 }
                 Command::Remove { key } => {
                     todo!()
@@ -121,7 +106,7 @@ impl KvStore {
         }
         Ok(KvStore {
             path: path.into().join("log.txt"),
-            table: hash,
+            table: HashMap::new(),
         })
     }
 }
