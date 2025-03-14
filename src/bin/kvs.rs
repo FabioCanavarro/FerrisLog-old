@@ -1,5 +1,5 @@
 extern crate clap;
-use std::{fs::File, path::PathBuf, process::exit};
+use std::{env::current_dir, fs::File, path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
 use kvs::kvstore::KvStore;
@@ -28,13 +28,7 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
-    let mut store = match KvStore::open(&PathBuf::from("log.txt")) {
-        Ok(_) => KvStore::open(&PathBuf::from("log.txt")).unwrap(),
-        Err(_) => {
-            let _ = File::create("log.txt");
-            KvStore::open(&PathBuf::from("log.txt")).expect("Error is here")
-        }
-    };
+    let mut store = KvStore::open(current_dir().unwrap().as_path()).unwrap();
     // Your implementation here
     match &cli.command.unwrap() {
         Commands::get { key } => {

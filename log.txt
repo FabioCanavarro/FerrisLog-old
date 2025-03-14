@@ -1,2 +1,2 @@
-{"Set":{"key":"haha","val":"haha"}}
-{"Remove":{"key":"haha"}}
+{"Set":{"key":"hehe","val":"hehe"}}
+{"Set":{"key":"hehe","val":"hehe"}}

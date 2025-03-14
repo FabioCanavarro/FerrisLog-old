@@ -77,15 +77,18 @@ impl KvStore {
         let _ = f.write_all(b"\n");
         let res = self.table.remove(&key);
         match res{
-            Some(_) => return Ok(()),
-            None => return Err(KvError::RemoveError),
+            Some(_) => Ok(()),
+            None => Err(KvError::RemoveError),
         }
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
-        let f = match File::open(path) {
+        let f = match File::open(path.into().join("log.txt")) {
             Ok(f) => f,
-            Err(_) => return Err(KvError::OpenError { path: current_dir().unwrap() }),
+            Err(_) => {
+                let _ = File::create(path.into().join("log.txt"));
+                File::open(path.into().join("log.txt")).unwrap()
+            }
         };
         let mut hash: HashMap<String, String> = HashMap::new();
         let buffer = BufReader::new(&f);
@@ -94,7 +97,6 @@ impl KvStore {
         let stream = temp.into_iter::<Command>();
 
         // For write we make vector from commmands we print vec to file
-
         for i in stream {
             match i.unwrap(){
                 Command::Set { key, val } => {hash.insert(key, val);},
@@ -102,7 +104,7 @@ impl KvStore {
             };
         }
         Ok(KvStore {
-            path: Into::into(path),
+            path: path.into().join("log.txt"),
             table: hash,
         })
     }

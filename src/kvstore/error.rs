@@ -17,7 +17,7 @@ impl fmt::Display for KvError {
         match self {
             KvError::WriteError => writeln!(f, "Writing has failed!"),
             KvError::ReadError => writeln!(f,"Unable to read!"),
-            KvError::OpenError => writeln!(f, "Opening has failed!"),
+            KvError::OpenError{path: _} => writeln!(f, "Opening has failed!"),
             KvError::ParseError => writeln!(f, "Parsing has failed!"),
             KvError::RemoveError => writeln!(f,"Unable to remove!"),
         }
