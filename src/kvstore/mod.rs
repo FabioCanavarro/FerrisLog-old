@@ -1,8 +1,5 @@
 use std::{
-    collections::HashMap,
-    fs::File,
-    io::{BufReader, Write},
-    path::{Path, PathBuf},
+    collections::HashMap, env::current_dir, fs::File, io::{BufReader, Write}, path::{Path, PathBuf}
 };
 pub mod command;
 pub mod error;
@@ -83,14 +80,12 @@ impl KvStore {
             Some(_) => return Ok(()),
             None => return Err(KvError::RemoveError),
         }
-
-        Ok(())
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
         let f = match File::open(path) {
             Ok(f) => f,
-            Err(_) => return Err(KvError::OpenError),
+            Err(_) => return Err(KvError::OpenError { path: current_dir().unwrap() }),
         };
         let mut hash: HashMap<String, String> = HashMap::new();
         let buffer = BufReader::new(&f);

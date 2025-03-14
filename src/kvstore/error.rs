@@ -1,11 +1,13 @@
 use serde::Deserialize;
 use std::error::Error;
 use std::fmt;
+use std::path::PathBuf;
+
 #[derive(Debug, Deserialize)]
 pub enum KvError {
     WriteError,
     ReadError,
-    OpenError,
+    OpenError{ path: PathBuf },
     ParseError,
     RemoveError
 }

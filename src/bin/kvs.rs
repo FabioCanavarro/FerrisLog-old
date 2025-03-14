@@ -52,7 +52,7 @@ fn main() {
             }
         },
         Commands::set { key, val } => {
-            let res = store.set(key.to_string(), val.to_string());
+            let _ = store.set(key.to_string(), val.to_string());
             
         }
     }
