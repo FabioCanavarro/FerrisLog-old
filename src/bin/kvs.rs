@@ -1,5 +1,5 @@
 extern crate clap;
-use std::{fs::File, path::PathBuf};
+use std::{fs::File, path::PathBuf, process::exit};
 
 use clap::{Parser, Subcommand};
 use kvs::kvstore::KvStore;
@@ -32,7 +32,7 @@ fn main() {
         Ok(_) => KvStore::open(&PathBuf::from("log.txt")).unwrap(),
         Err(_) => {
             let _ = File::create("log.txt");
-            KvStore::open(&PathBuf::from("log.txt")).unwrap()
+            KvStore::open(&PathBuf::from("log.txt")).expect("Error is here")
         }
     };
     // Your implementation here
@@ -43,12 +43,17 @@ fn main() {
                 Some(d) => println!("{}",d),
                 None => println!("Key not found")
             }
-        }
+        },
         Commands::rm { key } => {
-            let _ = store.remove(key.to_string());
-        }
+            let res = store.remove(key.to_string());
+            match res{
+                Ok(_) => (),
+                Err(_) => {println!("Key not found");exit(1);},
+            }
+        },
         Commands::set { key, val } => {
-            let _ = store.set(key.to_string(), val.to_string());
+            let res = store.set(key.to_string(), val.to_string());
+            
         }
     }
 }
