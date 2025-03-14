@@ -14,7 +14,7 @@ use error::{KvError, KvResult};
 #[derive(Debug)]
 pub struct KvStore {
     path: PathBuf,
-    table: HashMap<String, String>,
+    table: HashMap<String, u64>,
 }
 
 impl KvStore {
@@ -36,7 +36,8 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        self.table.insert(key, val);
+
+        todo!();
         /* let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
@@ -80,7 +81,13 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        let res = self.table.remove(&key);
+
+
+
+        todo!();
+
+
+
         match res {
             Some(_) => Ok(()),
             None => Err(KvError::RemoveError),
@@ -105,10 +112,10 @@ impl KvStore {
         for i in stream {
             match i.unwrap() {
                 Command::Set { key, val } => {
-                    hash.insert(key, val);
+                    todo!()
                 }
                 Command::Remove { key } => {
-                    hash.remove(&key);
+                    todo!()
                 }
             };
         }
