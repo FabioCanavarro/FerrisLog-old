@@ -33,21 +33,23 @@ fn main() {
     match &cli.command.unwrap() {
         Commands::get { key } => {
             let val = store.get(key.to_string());
-            match val.unwrap(){
-                Some(d) => println!("{}",d),
-                None => println!("Key not found")
+            match val.unwrap() {
+                Some(d) => println!("{}", d),
+                None => println!("Key not found"),
             }
-        },
+        }
         Commands::rm { key } => {
             let res = store.remove(key.to_string());
-            match res{
+            match res {
                 Ok(_) => (),
-                Err(_) => {println!("Key not found");exit(1);},
+                Err(_) => {
+                    println!("Key not found");
+                    exit(1);
+                }
             }
-        },
+        }
         Commands::set { key, val } => {
             let _ = store.set(key.to_string(), val.to_string());
-            
         }
     }
 }

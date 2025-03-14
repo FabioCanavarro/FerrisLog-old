@@ -1,5 +1,9 @@
 use std::{
-    collections::HashMap, env::current_dir, fs::File, io::{BufReader, Write}, path::{Path, PathBuf}
+    collections::HashMap,
+    env::current_dir,
+    fs::File,
+    io::{BufReader, Write},
+    path::{Path, PathBuf},
 };
 pub mod command;
 pub mod error;
@@ -77,7 +81,7 @@ impl KvStore {
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
         let res = self.table.remove(&key);
-        match res{
+        match res {
             Some(_) => Ok(()),
             None => Err(KvError::RemoveError),
         }
@@ -99,9 +103,13 @@ impl KvStore {
 
         // For write we make vector from commmands we print vec to file
         for i in stream {
-            match i.unwrap(){
-                Command::Set { key, val } => {hash.insert(key, val);},
-                Command::Remove { key } => {hash.remove(&key);},
+            match i.unwrap() {
+                Command::Set { key, val } => {
+                    hash.insert(key, val);
+                }
+                Command::Remove { key } => {
+                    hash.remove(&key);
+                }
             };
         }
         Ok(KvStore {

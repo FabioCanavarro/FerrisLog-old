@@ -7,19 +7,19 @@ use std::path::PathBuf;
 pub enum KvError {
     WriteError,
     ReadError,
-    OpenError{ path: PathBuf },
+    OpenError { path: PathBuf },
     ParseError,
-    RemoveError
+    RemoveError,
 }
 
 impl fmt::Display for KvError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             KvError::WriteError => writeln!(f, "Writing has failed!"),
-            KvError::ReadError => writeln!(f,"Unable to read!"),
-            KvError::OpenError{path: _} => writeln!(f, "Opening has failed!"),
+            KvError::ReadError => writeln!(f, "Unable to read!"),
+            KvError::OpenError { path: _ } => writeln!(f, "Opening has failed!"),
             KvError::ParseError => writeln!(f, "Parsing has failed!"),
-            KvError::RemoveError => writeln!(f,"Unable to remove!"),
+            KvError::RemoveError => writeln!(f, "Unable to remove!"),
         }
     }
 }
