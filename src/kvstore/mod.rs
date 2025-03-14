@@ -22,7 +22,7 @@ impl KvStore {
     }
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
-        let cmd = Command::set(key.clone(), val);
+        let cmd = Command::set(key.clone(), val.clone());
 
         let mut f = File::options()
             .read(true)
@@ -32,6 +32,7 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
+        self.table.insert(key, val);
         /* let start_pos = f.seek(SeekFrom::End(0));
         let _ = serde_json::to_writer(&mut f, &cmd);
         let end_pos = f.seek(SeekFrom::End(0));
