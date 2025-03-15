@@ -1,9 +1,5 @@
 use std::{
-    collections::HashMap,
-    env::current_dir,
-    fs::File,
-    io::{BufReader, Seek, SeekFrom, Write},
-    path::{Path, PathBuf},
+    collections::HashMap, fs::File, io::{BufRead, BufReader, Seek, SeekFrom, Write}, path::{Path, PathBuf}
 };
 pub mod command;
 pub mod error;
@@ -47,13 +43,29 @@ impl KvStore {
 
     pub fn get(&self, key: String) -> KvResult<Option<String>> {
         let val = self.table.get(&key);
-        let mut f = File::options()
+        match &val {
+            Some(_) => (),
+            None => return Ok(None)
+        }
+        
+        let file = File::options()
             .read(true)
-            .append(true)
             .open(&self.path)
             .unwrap();
 
+        let mut f = BufReader::new(file);
+
         // Seek from val to the \n
+        let _ = f.seek(SeekFrom::Start(*val.unwrap()));
+        let mut line = String::new();
+        let _ = f.read_line(&mut line);
+        let res = serde_json::from_str::<Command>(&line.to_string());
+        match res.unwrap() {
+            Command::Set{key: _, val} => Ok(Some(val)),
+            _ => Ok(None)
+        }
+
+        
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
@@ -91,8 +103,16 @@ impl KvStore {
         let mut hash: HashMap<String, String> = HashMap::new();
         let buffer = BufReader::new(&f);
 
-        let temp = serde_json::Deserializer::from_reader(buffer);
-        let stream = temp.into_iter::<Command>();
+        loop{
+            let line = String::new();
+            let _ = buffer.read_line(line);
+        }
+
+        
+
+
+
+        /* let stream = temp.into_iter::<Command>();
 
         // For write we make vector from commmands we print vec to file
         for i in stream {
@@ -103,7 +123,7 @@ impl KvStore {
                     todo!()
                 }
             };
-        }
+        } */
         Ok(KvStore {
             path: path.into().join("log.txt"),
             table: HashMap::new(),
