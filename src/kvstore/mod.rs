@@ -1,5 +1,8 @@
 use std::{
-    collections::HashMap, fs::File, io::{BufRead, BufReader, Seek, SeekFrom, Write}, path::{Path, PathBuf}
+    collections::HashMap,
+    fs::File,
+    io::{BufRead, BufReader, Seek, SeekFrom, Write},
+    path::{Path, PathBuf},
 };
 pub mod command;
 pub mod error;
@@ -33,10 +36,7 @@ impl KvStore {
         let start_pos = f.seek(SeekFrom::End(0)).unwrap();
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        self.table.insert(
-            key,
-            start_pos
-        );
+        self.table.insert(key, start_pos);
 
         Ok(())
     }
@@ -45,13 +45,10 @@ impl KvStore {
         let val = self.table.get(&key);
         match &val {
             Some(_) => (),
-            None => return Ok(None)
+            None => return Ok(None),
         }
-        
-        let file = File::options()
-            .read(true)
-            .open(&self.path)
-            .unwrap();
+
+        let file = File::options().read(true).open(&self.path).unwrap();
 
         let mut f = BufReader::new(file);
 
@@ -61,17 +58,12 @@ impl KvStore {
         let _ = f.read_line(&mut line);
         let res = serde_json::from_str::<Command>(&line.to_string());
         match res {
-            Ok(re) => {
-                match re {
-                    Command::Set{key: _, val} => return Ok(Some(val)),
-                    _ => return Ok(None)
-
-                }
+            Ok(re) => match re {
+                Command::Set { key: _, val } => return Ok(Some(val)),
+                _ => return Ok(None),
             },
-            Err(_) => Err(KvError::ParseError)
+            Err(_) => Err(KvError::ParseError),
         }
-
-        
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
@@ -86,18 +78,13 @@ impl KvStore {
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
 
-
-
         todo!();
-
 
         match res {
             Some(_) => Ok(()),
             None => Err(KvError::RemoveError),
         }
     }
-
-
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
         let f = match File::open(path.into().join("log.txt")) {
@@ -111,30 +98,27 @@ impl KvStore {
         let mut buffer = BufReader::new(&f);
         let mut pos = buffer.seek(SeekFrom::Start(0)).unwrap();
 
-        loop{
+        loop {
             let mut line = String::new();
 
             let length = buffer.read_line(&mut line).unwrap();
-            if length == 0{
+            if length == 0 {
                 break;
             }
             let res = serde_json::from_str::<Command>(&line.to_string());
 
             match res {
                 Ok(re) => {
-                    if let Command::Set{key, val: _} = re {hash.insert(key, pos);}
-                },
+                    if let Command::Set { key, val: _ } = re {
+                        hash.insert(key, pos);
+                    }
+                }
 
-                Err(_) => return Err(KvError::ParseError)
+                Err(_) => return Err(KvError::ParseError),
             }
 
             pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
-
         }
-
-        
-
-
 
         Ok(KvStore {
             path: path.into().join("log.txt"),

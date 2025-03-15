@@ -24,7 +24,7 @@ impl fmt::Display for KvError {
     }
 }
 
-impl From<std::io::Error> for KvError{
+impl From<std::io::Error> for KvError {
     fn from(value: std::io::Error) -> Self {
         value.into()
     }
