@@ -77,9 +77,11 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        let _ = self.table.remove(&key);
+        match self.table.remove(&key){
+            Some(_) => Ok(()),
+            None =>  Err(KvError::RemoveError)
+        }
 
-        Ok(())
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
