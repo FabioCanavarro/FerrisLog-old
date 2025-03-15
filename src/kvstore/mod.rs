@@ -59,8 +59,8 @@ impl KvStore {
         let res = serde_json::from_str::<Command>(&line.to_string());
         match res {
             Ok(re) => match re {
-                Command::Set { key: _, val } => return Ok(Some(val)),
-                _ => return Ok(None),
+                Command::Set { key: _, val } => Ok(Some(val)),
+                _ => Ok(None),
             },
             Err(_) => Err(KvError::ParseError),
         }
@@ -77,13 +77,9 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
+        let _ = self.table.remove(&key);
 
-        todo!();
-
-        match res {
-            Some(_) => Ok(()),
-            None => Err(KvError::RemoveError),
-        }
+        Ok(())
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
@@ -109,9 +105,10 @@ impl KvStore {
 
             match res {
                 Ok(re) => {
-                    if let Command::Set { key, val: _ } = re {
-                        hash.insert(key, pos);
-                    }
+                    match re {
+                        Command::Set { key, val: _ } => hash.insert(key, pos),
+                        Command::Remove { key } => hash.remove(&key),
+                    };
                 }
 
                 Err(_) => return Err(KvError::ParseError),

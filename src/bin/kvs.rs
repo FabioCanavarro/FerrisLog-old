@@ -1,5 +1,5 @@
 extern crate clap;
-use std::{env::current_dir, fs::File, path::PathBuf, process::exit};
+use std::{env::current_dir, process::exit};
 
 use clap::{Parser, Subcommand};
 use kvs::kvstore::KvStore;
@@ -29,8 +29,9 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
     let mut store = KvStore::open(current_dir().unwrap().as_path()).unwrap();
+
     // Your implementation here
-    match &cli.command.unwrap() {
+    match &cli.command.expect("ERROR: There is no commands found in the following input") {
         Commands::get { key } => {
             let val = store.get(key.to_string());
             match val.unwrap() {
