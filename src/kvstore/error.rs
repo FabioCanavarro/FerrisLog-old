@@ -24,6 +24,12 @@ impl fmt::Display for KvError {
     }
 }
 
+impl From<std::io::Error> for KvError{
+    fn from(value: std::io::Error) -> Self {
+        value.into()
+    }
+}
+
 impl Error for KvError {}
 
 pub type KvResult<T> = Result<T, KvError>;

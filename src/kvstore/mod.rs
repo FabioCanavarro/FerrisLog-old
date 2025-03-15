@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, fs::File, io::{BufRead, BufReader, Seek, SeekFrom, Write}, path::{Path, PathBuf}, thread::current
+    collections::HashMap, fs::File, io::{BufRead, BufReader, Seek, SeekFrom, Write}, path::{Path, PathBuf}
 };
 pub mod command;
 pub mod error;
@@ -90,13 +90,14 @@ impl KvStore {
 
         todo!();
 
-        let res = Some(1);
 
         match res {
             Some(_) => Ok(()),
             None => Err(KvError::RemoveError),
         }
     }
+
+
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
         let f = match File::open(path.into().join("log.txt")) {
@@ -106,30 +107,28 @@ impl KvStore {
                 File::open(path.into().join("log.txt")).unwrap()
             }
         };
-        let mut hash: HashMap<String, String> = HashMap::new();
+        let mut hash: HashMap<String, u64> = HashMap::new();
         let mut buffer = BufReader::new(&f);
-        let mut pos = buffer.seek(SeekFrom::Start(0));
+        let mut pos = buffer.seek(SeekFrom::Start(0)).unwrap();
 
         loop{
             let mut line = String::new();
 
-            let length = buffer.read_line(&mut line);
+            let length = buffer.read_line(&mut line).unwrap();
+            if length == 0{
+                break;
+            }
             let res = serde_json::from_str::<Command>(&line.to_string());
 
             match res {
                 Ok(re) => {
-                    match re {
-                        Command::Set{key: _, val} => {hash.insert(key, pos.unwrap());},
-                        _ => ()
-
-                    }
+                    if let Command::Set{key, val: _} = re {hash.insert(key, pos);}
                 },
 
                 Err(_) => return Err(KvError::ParseError)
             }
 
-            pos = buffer.seek(SeekFrom::Start(pos.unwrap() + length.unwrap() as u64));
-
+            pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
 
         }
 
@@ -137,21 +136,9 @@ impl KvStore {
 
 
 
-        /* let stream = temp.into_iter::<Command>();
-
-        // For write we make vector from commmands we print vec to file
-        for i in stream {
-            match i.unwrap() {
-                Command::Set { key, val } => {()
-                }
-                Command::Remove { key } => {
-                    todo!()
-                }
-            };
-        } */
         Ok(KvStore {
             path: path.into().join("log.txt"),
-            table: HashMap::new(),
+            table: hash,
         })
     }
 }
