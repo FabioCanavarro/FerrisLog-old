@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     fs::File,
-    io::{BufRead, BufReader, Seek, SeekFrom, Write},
+    io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
 };
 pub mod command;
@@ -9,6 +9,7 @@ pub mod error;
 
 use command::Command;
 use error::{KvError, KvResult};
+use tempfile::TempDir;
 
 #[derive(Debug)]
 pub struct KvStore {
@@ -123,5 +124,39 @@ impl KvStore {
             path: path.into().join("log.txt"),
             table: hash,
         })
+    }
+
+    pub fn compaction(&mut self) -> KvResult<()>{
+        let temp_dir = TempDir::new().expect("Unable to create temporary working directory");
+        let mut store = KvStore::open(temp_dir.path()).unwrap();
+
+        
+        for key in self.table.keys(){
+            let _ = store.set(key.to_string(), self.get(key.to_string()).unwrap().unwrap().to_string());
+        }
+
+        self.table = store.table;
+
+        let mut f = File::options()
+            .read(true)
+            .write(true)
+            .open(&self.path)
+            .unwrap();
+        let mut fr = File::options()
+            .read(true)
+            .open(&temp_dir)
+            .unwrap();
+        let mut buffer = String::new();
+        let _ = fr.read_to_string(&mut buffer);
+        let _ = f.write_all(buffer.as_bytes());
+
+        Ok(())
+        
+        
+
+
+        
+
+
     }
 }
