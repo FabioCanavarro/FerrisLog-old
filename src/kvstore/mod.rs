@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, fs::File, io::{BufRead, BufReader, Seek, SeekFrom, Write}, path::{Path, PathBuf}
+    collections::HashMap, fs::File, io::{BufRead, BufReader, Seek, SeekFrom, Write}, path::{Path, PathBuf}, thread::current
 };
 pub mod command;
 pub mod error;
@@ -60,9 +60,15 @@ impl KvStore {
         let mut line = String::new();
         let _ = f.read_line(&mut line);
         let res = serde_json::from_str::<Command>(&line.to_string());
-        match res.unwrap() {
-            Command::Set{key: _, val} => Ok(Some(val)),
-            _ => Ok(None)
+        match res {
+            Ok(re) => {
+                match re {
+                    Command::Set{key: _, val} => return Ok(Some(val)),
+                    _ => return Ok(None)
+
+                }
+            },
+            Err(_) => Err(KvError::ParseError)
         }
 
         
@@ -101,11 +107,30 @@ impl KvStore {
             }
         };
         let mut hash: HashMap<String, String> = HashMap::new();
-        let buffer = BufReader::new(&f);
+        let mut buffer = BufReader::new(&f);
+        let mut pos = buffer.seek(SeekFrom::Start(0));
 
         loop{
-            let line = String::new();
-            let _ = buffer.read_line(line);
+            let mut line = String::new();
+
+            let length = buffer.read_line(&mut line);
+            let res = serde_json::from_str::<Command>(&line.to_string());
+
+            match res {
+                Ok(re) => {
+                    match re {
+                        Command::Set{key: _, val} => {hash.insert(key, pos.unwrap());},
+                        _ => ()
+
+                    }
+                },
+
+                Err(_) => return Err(KvError::ParseError)
+            }
+
+            pos = buffer.seek(SeekFrom::Start(pos.unwrap() + length.unwrap() as u64));
+
+
         }
 
         
