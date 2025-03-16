@@ -31,7 +31,10 @@ fn main() {
     let mut store = KvStore::open(current_dir().unwrap().as_path()).unwrap();
 
     // Your implementation here
-    match &cli.command.expect("ERROR: There is no commands found in the following input") {
+    match &cli
+        .command
+        .expect("ERROR: There is no commands found in the following input")
+    {
         Commands::get { key } => {
             let val = store.get(key.to_string());
             match val.unwrap() {

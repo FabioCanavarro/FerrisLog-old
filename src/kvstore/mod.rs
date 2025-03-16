@@ -14,8 +14,6 @@ use tempfile::TempDir;
 // Consts
 const COMPACTION_THRESHOLD: u64 = 1024 * 1024;
 
-
-
 #[derive(Debug)]
 pub struct KvStore {
     path: PathBuf,
@@ -23,7 +21,6 @@ pub struct KvStore {
 }
 
 impl KvStore {
-
     pub fn new(path: PathBuf) -> KvStore {
         KvStore {
             path,
@@ -49,7 +46,7 @@ impl KvStore {
 
         let length = size.unwrap().len();
 
-        if length > COMPACTION_THRESHOLD{
+        if length > COMPACTION_THRESHOLD {
             let _ = self.compaction();
         }
 
@@ -77,9 +74,7 @@ impl KvStore {
                 Command::Set { key: _, val } => Ok(Some(val)),
                 _ => Ok(None),
             },
-            Err(_) => {
-                Err(KvError::ParseError)
-            },
+            Err(_) => Err(KvError::ParseError),
         }
     }
 
@@ -94,11 +89,10 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        match self.table.remove(&key){
+        match self.table.remove(&key) {
             Some(_) => Ok(()),
-            None =>  Err(KvError::RemoveError)
+            None => Err(KvError::RemoveError),
         }
-
     }
 
     pub fn open(path: impl Into<PathBuf> + AsRef<Path> + Copy) -> KvResult<KvStore> {
@@ -141,9 +135,6 @@ impl KvStore {
             path: path.into().join("log.txt"),
             table: hash,
         })
-        
-
-
     }
 
     pub fn no_compaction_open(path: impl Copy + Into<PathBuf> + AsRef<Path>) -> KvResult<KvStore> {
@@ -181,19 +172,22 @@ impl KvStore {
             pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
         }
 
-        Ok(KvStore { path: path.into().join("log.txt"), table: hash})
-
-        
+        Ok(KvStore {
+            path: path.into().join("log.txt"),
+            table: hash,
+        })
     }
 
-    pub fn compaction(&mut self) -> KvResult<()>{
+    pub fn compaction(&mut self) -> KvResult<()> {
         let temp_dir = TempDir::new().expect("Unable to create temporary working directory");
         let mut store = KvStore::no_compaction_open(temp_dir.path()).unwrap();
-        
-        for key in self.table.keys(){
-            let _ = store.set(key.to_string(), self.get(key.to_string()).unwrap().unwrap().to_string());
-        }
 
+        for key in self.table.keys() {
+            let _ = store.set(
+                key.to_string(),
+                self.get(key.to_string()).unwrap().unwrap().to_string(),
+            );
+        }
 
         let mut f = File::options()
             .read(true)
@@ -202,25 +196,14 @@ impl KvStore {
             .open(&self.path)
             .unwrap();
 
-        let mut fr = File::options()
-            .read(true)
-            .open(&store.path)
-            .unwrap();
-
+        let mut fr = File::options().read(true).open(&store.path).unwrap();
 
         self.table = store.table;
 
         let mut buffer = String::new();
         let _ = fr.read_to_string(&mut buffer);
         let _ = f.write_all(buffer.as_bytes());
-        
+
         Ok(())
-        
-        
-
-
-        
-
-
     }
 }
