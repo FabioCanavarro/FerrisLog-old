@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    fs::File,
+    fs::{self, File},
     io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
 };
@@ -11,13 +11,19 @@ use command::Command;
 use error::{KvError, KvResult};
 use tempfile::TempDir;
 
+// Consts
+const COMPACTION_THRESHOLD: u64 = 1024 * 1024;
+
+
+
 #[derive(Debug)]
 pub struct KvStore {
     path: PathBuf,
-    table: HashMap<String, u64>,
+    pub table: HashMap<String, u64>,
 }
 
 impl KvStore {
+
     pub fn new(path: PathBuf) -> KvStore {
         KvStore {
             path,
@@ -38,6 +44,14 @@ impl KvStore {
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
         self.table.insert(key, start_pos);
+
+        let size = fs::metadata(&self.path);
+
+        let length = size.unwrap().len();
+
+        if length > COMPACTION_THRESHOLD{
+            let _ = self.compaction();
+        }
 
         Ok(())
     }
@@ -63,7 +77,9 @@ impl KvStore {
                 Command::Set { key: _, val } => Ok(Some(val)),
                 _ => Ok(None),
             },
-            Err(_) => Err(KvError::ParseError),
+            Err(_) => {
+                Err(KvError::ParseError)
+            },
         }
     }
 
@@ -121,15 +137,13 @@ impl KvStore {
         }
 
         // This is the error, cause recursive
-        let mut store =KvStore {
+        Ok(KvStore {
             path: path.into().join("log.txt"),
             table: hash,
-        };
-        println!("here");
+        })
+        
 
-        let _ = store.compaction();
 
-        Ok(store)
     }
 
     pub fn no_compaction_open(path: impl Copy + Into<PathBuf> + AsRef<Path>) -> KvResult<KvStore> {
@@ -177,7 +191,6 @@ impl KvStore {
         let mut store = KvStore::no_compaction_open(temp_dir.path()).unwrap();
         
         for key in self.table.keys(){
-            println!("{:?}",&key);
             let _ = store.set(key.to_string(), self.get(key.to_string()).unwrap().unwrap().to_string());
         }
 
@@ -200,7 +213,7 @@ impl KvStore {
         let mut buffer = String::new();
         let _ = fr.read_to_string(&mut buffer);
         let _ = f.write_all(buffer.as_bytes());
-
+        
         Ok(())
         
         
