@@ -154,50 +154,9 @@ impl KvStore {
         })
     }
 
-    pub fn no_compaction_open(path: impl Copy + Into<PathBuf> + AsRef<Path>) -> KvResult<KvStore> {
-        let f = match File::open(path.into().join("log.txt")) {
-            Ok(f) => f,
-            Err(_) => {
-                let _ = File::create(path.into().join("log.txt"));
-                File::open(path.into().join("log.txt")).unwrap()
-            }
-        };
-        let mut hash: HashMap<String, u64> = HashMap::new();
-        let mut buffer = BufReader::new(&f);
-        let mut pos = buffer.seek(SeekFrom::Start(0)).unwrap();
-
-        loop {
-            let mut line = String::new();
-
-            let length = buffer.read_line(&mut line).unwrap();
-            if length == 0 {
-                break;
-            }
-            let res = serde_json::from_str::<Command>(&line.to_string());
-
-            match res {
-                Ok(re) => {
-                    match re {
-                        Command::Set { key, val: _ } => hash.insert(key, pos),
-                        Command::Remove { key } => hash.remove(&key),
-                    };
-                }
-
-                Err(_) => return Err(KvError::ParseError),
-            }
-
-            pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
-        }
-
-        Ok(KvStore {
-            path: path.into().join("log.txt"),
-            table: hash,
-        })
-    }
-
     pub fn compaction(&mut self) -> KvResult<()> {
         let temp_dir = TempDir::new().expect("Unable to create temporary working directory");
-        let mut store = KvStore::no_compaction_open(temp_dir.path()).unwrap();
+        let mut store = KvStore::open(temp_dir.path()).unwrap();
 
         for key in self.table.keys() {
             let _ = store.nocompactionset(
