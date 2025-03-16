@@ -12,7 +12,7 @@ use error::{KvError, KvResult};
 use tempfile::TempDir;
 
 // Consts
-const COMPACTION_THRESHOLD: u64 = 1024 * 1024;
+const COMPACTION_THRESHOLD: u64 = 1024;
 
 #[derive(Debug)]
 pub struct KvStore {
@@ -27,6 +27,23 @@ impl KvStore {
             table: HashMap::new(),
         }
     }
+    pub fn nocompactionset(&mut self, key: String, val: String) -> KvResult<()> {
+        let cmd = Command::set(key.clone(), val.clone());
+
+        let mut f = File::options()
+            .read(true)
+            .append(true)
+            .open(&self.path)
+            .unwrap();
+
+        let start_pos = f.seek(SeekFrom::End(0)).unwrap();
+        let _ = serde_json::to_writer(&mut f, &cmd);
+        let _ = f.write_all(b"\n");
+        self.table.insert(key, start_pos);
+
+        Ok(())
+    }
+
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
         let cmd = Command::set(key.clone(), val.clone());
@@ -183,7 +200,7 @@ impl KvStore {
         let mut store = KvStore::no_compaction_open(temp_dir.path()).unwrap();
 
         for key in self.table.keys() {
-            let _ = store.set(
+            let _ = store.nocompactionset(
                 key.to_string(),
                 self.get(key.to_string()).unwrap().unwrap().to_string(),
             );

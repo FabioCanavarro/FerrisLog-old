@@ -273,7 +273,7 @@ fn compaction() -> Result<(), Box<dyn Error>> {
     };
     let mut current_size = dir_size();
     for iter in 0..10 {
-        for key_id in 0..100 {
+        for key_id in 0..200 {
             let key = format!("key{}", key_id);
             let value = format!("{}", iter);
             store.set(key, value)?;
