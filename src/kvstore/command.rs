@@ -12,10 +12,3 @@ impl Command {
         Command::Remove { key }
     }
 }
-
-#[derive(Debug)]
-struct LogPosition {
-    gen: u64,
-    start: u64,
-    end: u64,
-}

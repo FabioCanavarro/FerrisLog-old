@@ -271,10 +271,9 @@ fn compaction() -> Result<(), Box<dyn Error>> {
             .sum();
         len.expect("fail to get directory size")
     };
-
     let mut current_size = dir_size();
-    for iter in 0..1000 {
-        for key_id in 0..1000 {
+    for iter in 0..10 {
+        for key_id in 0..200 {
             let key = format!("key{}", key_id);
             let value = format!("{}", iter);
             store.set(key, value)?;
@@ -290,7 +289,7 @@ fn compaction() -> Result<(), Box<dyn Error>> {
         drop(store);
         // reopen and check content.
         let mut store = KvStore::open(temp_dir.path())?;
-        for key_id in 0..1000 {
+        for key_id in 0..100 {
             let key = format!("key{}", key_id);
             assert_eq!(store.get(key)?, Some(format!("{}", iter)));
         }

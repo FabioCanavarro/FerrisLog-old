@@ -1,8 +1,7 @@
 use std::{
     collections::HashMap,
-    env::current_dir,
-    fs::File,
-    io::{BufReader, Write},
+    fs::{self, File},
+    io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
 };
 pub mod command;
@@ -10,11 +9,15 @@ pub mod error;
 
 use command::Command;
 use error::{KvError, KvResult};
+use tempfile::TempDir;
+
+// Consts
+const COMPACTION_THRESHOLD: u64 = 1024;
 
 #[derive(Debug)]
 pub struct KvStore {
     path: PathBuf,
-    table: HashMap<String, String>,
+    pub table: HashMap<String, u64>,
 }
 
 impl KvStore {
@@ -24,6 +27,23 @@ impl KvStore {
             table: HashMap::new(),
         }
     }
+    pub fn nocompactionset(&mut self, key: String, val: String) -> KvResult<()> {
+        let cmd = Command::set(key.clone(), val.clone());
+
+        let mut f = File::options()
+            .read(true)
+            .append(true)
+            .open(&self.path)
+            .unwrap();
+
+        let start_pos = f.seek(SeekFrom::End(0)).unwrap();
+        let _ = serde_json::to_writer(&mut f, &cmd);
+        let _ = f.write_all(b"\n");
+        self.table.insert(key, start_pos);
+
+        Ok(())
+    }
+
 
     pub fn set(&mut self, key: String, val: String) -> KvResult<()> {
         let cmd = Command::set(key.clone(), val.clone());
@@ -34,39 +54,45 @@ impl KvStore {
             .open(&self.path)
             .unwrap();
 
+        let start_pos = f.seek(SeekFrom::End(0)).unwrap();
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        self.table.insert(key, val);
-        /* let start_pos = f.seek(SeekFrom::End(0));
-        let _ = serde_json::to_writer(&mut f, &cmd);
-        let end_pos = f.seek(SeekFrom::End(0));
-        if self.table.contains_key(&key) {
-            let gen = self.table.get_key_value(&key).unwrap().1.gen + 1;
-            self.table.insert(
-                key,
-                LogPosition {
-                    gen,
-                    start: start_pos.unwrap(),
-                    end: end_pos.unwrap(),
-                },
-            );
-        } else {
-            self.table.insert(
-                key,
-                LogPosition {
-                    gen: 1,
-                    start: start_pos.unwrap(),
-                    end: end_pos.unwrap(),
-                },
-            );
-        } */
+        self.table.insert(key, start_pos);
+
+        let size = fs::metadata(&self.path);
+
+        let length = size.unwrap().len();
+
+        if length > COMPACTION_THRESHOLD {
+            let _ = self.compaction();
+        }
 
         Ok(())
     }
 
     pub fn get(&self, key: String) -> KvResult<Option<String>> {
         let val = self.table.get(&key);
-        Ok(val.cloned())
+        match &val {
+            Some(_) => (),
+            None => return Ok(None),
+        }
+
+        let file = File::options().read(true).open(&self.path).unwrap();
+
+        let mut f = BufReader::new(file);
+
+        // Seek from val to the \n
+        let _ = f.seek(SeekFrom::Start(*val.unwrap()));
+        let mut line = String::new();
+        let _ = f.read_line(&mut line);
+        let res = serde_json::from_str::<Command>(&line.to_string());
+        match res {
+            Ok(re) => match re {
+                Command::Set { key: _, val } => Ok(Some(val)),
+                _ => Ok(None),
+            },
+            Err(_) => Err(KvError::ParseError),
+        }
     }
 
     pub fn remove(&mut self, key: String) -> KvResult<()> {
@@ -80,8 +106,7 @@ impl KvStore {
 
         let _ = serde_json::to_writer(&mut f, &cmd);
         let _ = f.write_all(b"\n");
-        let res = self.table.remove(&key);
-        match res {
+        match self.table.remove(&key) {
             Some(_) => Ok(()),
             None => Err(KvError::RemoveError),
         }
@@ -95,26 +120,66 @@ impl KvStore {
                 File::open(path.into().join("log.txt")).unwrap()
             }
         };
-        let mut hash: HashMap<String, String> = HashMap::new();
-        let buffer = BufReader::new(&f);
+        let mut hash: HashMap<String, u64> = HashMap::new();
+        let mut buffer = BufReader::new(&f);
+        let mut pos = buffer.seek(SeekFrom::Start(0)).unwrap();
 
-        let temp = serde_json::Deserializer::from_reader(buffer);
-        let stream = temp.into_iter::<Command>();
+        loop {
+            let mut line = String::new();
 
-        // For write we make vector from commmands we print vec to file
-        for i in stream {
-            match i.unwrap() {
-                Command::Set { key, val } => {
-                    hash.insert(key, val);
+            let length = buffer.read_line(&mut line).unwrap();
+            if length == 0 {
+                break;
+            }
+            let res = serde_json::from_str::<Command>(&line.to_string());
+
+            match res {
+                Ok(re) => {
+                    match re {
+                        Command::Set { key, val: _ } => hash.insert(key, pos),
+                        Command::Remove { key } => hash.remove(&key),
+                    };
                 }
-                Command::Remove { key } => {
-                    hash.remove(&key);
-                }
-            };
+
+                Err(_) => return Err(KvError::ParseError),
+            }
+
+            pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
         }
+
+        // This is the error, cause recursive
         Ok(KvStore {
             path: path.into().join("log.txt"),
             table: hash,
         })
+    }
+
+    pub fn compaction(&mut self) -> KvResult<()> {
+        let temp_dir = TempDir::new().expect("Unable to create temporary working directory");
+        let mut store = KvStore::open(temp_dir.path()).unwrap();
+
+        for key in self.table.keys() {
+            let _ = store.nocompactionset(
+                key.to_string(),
+                self.get(key.to_string()).unwrap().unwrap().to_string(),
+            );
+        }
+
+        let mut f = File::options()
+            .read(true)
+            .truncate(true)
+            .write(true)
+            .open(&self.path)
+            .unwrap();
+
+        let mut fr = File::options().read(true).open(&store.path).unwrap();
+
+        self.table = store.table;
+
+        let mut buffer = String::new();
+        let _ = fr.read_to_string(&mut buffer);
+        let _ = f.write_all(buffer.as_bytes());
+
+        Ok(())
     }
 }
