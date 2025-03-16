@@ -120,32 +120,83 @@ impl KvStore {
             pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
         }
 
-        Ok(KvStore {
+        // This is the error, cause recursive
+        let mut store =KvStore {
             path: path.into().join("log.txt"),
             table: hash,
-        })
+        };
+        println!("here");
+
+        let _ = store.compaction();
+
+        Ok(store)
+    }
+
+    pub fn no_compaction_open(path: impl Copy + Into<PathBuf> + AsRef<Path>) -> KvResult<KvStore> {
+        let f = match File::open(path.into().join("log.txt")) {
+            Ok(f) => f,
+            Err(_) => {
+                let _ = File::create(path.into().join("log.txt"));
+                File::open(path.into().join("log.txt")).unwrap()
+            }
+        };
+        let mut hash: HashMap<String, u64> = HashMap::new();
+        let mut buffer = BufReader::new(&f);
+        let mut pos = buffer.seek(SeekFrom::Start(0)).unwrap();
+
+        loop {
+            let mut line = String::new();
+
+            let length = buffer.read_line(&mut line).unwrap();
+            if length == 0 {
+                break;
+            }
+            let res = serde_json::from_str::<Command>(&line.to_string());
+
+            match res {
+                Ok(re) => {
+                    match re {
+                        Command::Set { key, val: _ } => hash.insert(key, pos),
+                        Command::Remove { key } => hash.remove(&key),
+                    };
+                }
+
+                Err(_) => return Err(KvError::ParseError),
+            }
+
+            pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
+        }
+
+        Ok(KvStore { path: path.into().join("log.txt"), table: hash})
+
+        
     }
 
     pub fn compaction(&mut self) -> KvResult<()>{
         let temp_dir = TempDir::new().expect("Unable to create temporary working directory");
-        let mut store = KvStore::open(temp_dir.path()).unwrap();
-
+        let mut store = KvStore::no_compaction_open(temp_dir.path()).unwrap();
         
         for key in self.table.keys(){
+            println!("{:?}",&key);
             let _ = store.set(key.to_string(), self.get(key.to_string()).unwrap().unwrap().to_string());
         }
 
-        self.table = store.table;
 
         let mut f = File::options()
             .read(true)
+            .truncate(true)
             .write(true)
             .open(&self.path)
             .unwrap();
+
         let mut fr = File::options()
             .read(true)
-            .open(&temp_dir)
+            .open(&store.path)
             .unwrap();
+
+
+        self.table = store.table;
+
         let mut buffer = String::new();
         let _ = fr.read_to_string(&mut buffer);
         let _ = f.write_all(buffer.as_bytes());
