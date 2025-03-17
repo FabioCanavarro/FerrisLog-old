@@ -75,4 +75,3 @@ kvs get username  # Output: "Key not found"
 3. Commit changes (`git commit -m 'Add amzing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
-```
