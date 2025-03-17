@@ -7,6 +7,8 @@ A minimal, persistent key-value store implemented in Rust, featuring a CLI inter
 
 ## Features
 
+### Existing
+
 - **CRUD Operations**: `set`, `get`, and `rm` commands
 - **Persistence**: Operations logged to `log.txt` (JSON format)
 - **Crash Recovery**: Rebuilds state from log file on startup
