@@ -13,7 +13,7 @@ A minimal, persistent key-value store implemented in Rust, featuring a CLI inter
 - **CLI Interface**: Built with `clap` for command parsing
 - **Error Handling**: Custom error types for storage operations
 
-## Planned Features
+### Planned
 - **Multi Threaded Operations**
 - **Server and client KVS**
 - **Time-To-Live**
