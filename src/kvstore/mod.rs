@@ -1,14 +1,12 @@
 use std::{
-    collections::HashMap,
-    fs::{self, File},
-    io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
-    path::{Path, PathBuf},
+    collections::HashMap, env::home_dir, fs::{self, create_dir, File}, io::{BufRead, BufReader, Read, Seek, SeekFrom, Write}, path::{Path, PathBuf}
 };
 pub mod command;
 pub mod error;
 
 use command::Command;
 use error::{KvError, KvResult};
+use predicates::path;
 use tempfile::TempDir;
 
 // Consts
@@ -195,6 +193,20 @@ impl KvStore {
         }
     }
 
+    pub fn count(&mut self) -> u32{
+        self.table.clone().into_keys().count() as u32
+    }
+    
+    pub fn create_snapshot(&mut self) -> KvResult<()>{
+        let parent_dir = self.path.parent();
+        let mut f = File::options()
+            .read(true)
+            .open(&self.path)
+            .unwrap();
+
+       create_dir(parent_dir.unwrap().join("/snapshots"));
+
+    }
 
 
 

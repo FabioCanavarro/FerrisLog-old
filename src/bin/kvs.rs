@@ -24,7 +24,8 @@ enum Commands {
     rm {
         key: String,
     },
-    list_key
+    list_key,
+    count
 }
 
 fn main() {
@@ -58,6 +59,9 @@ fn main() {
         },
         Commands::list_key => {
             store.list_key();
+        },
+        Commands::count => {
+            println!("{}",store.count());
         }
     }
 }
