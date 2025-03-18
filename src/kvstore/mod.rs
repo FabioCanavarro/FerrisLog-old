@@ -182,4 +182,29 @@ impl KvStore {
 
         Ok(())
     }
+
+    pub fn list_key(&mut self){
+        if self.table.is_empty(){
+            println!("No key is found");
+        }
+        print!("Keys: ");
+        for i in self.table.clone().into_keys(){
+
+            print!("{}, ",i);
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
