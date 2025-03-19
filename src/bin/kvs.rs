@@ -24,7 +24,8 @@ enum Commands {
         key: String,
     },
     list_key,
-    count
+    count,
+    create_snapshot
 }
 
 fn main() {
@@ -61,6 +62,9 @@ fn main() {
         },
         Commands::count => {
             println!("{}",store.count());
+        },
+        Commands::create_snapshot => {
+            let _ = store.create_snapshot();
         }
     }
 }

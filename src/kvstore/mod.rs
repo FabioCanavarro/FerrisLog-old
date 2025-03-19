@@ -210,7 +210,9 @@ impl KvStore {
         let new_log_path: PathBuf = parent_dir.join(format!("/snapshots/log{}.txt", cur_date));
 
         let _  = create_dir(parent_dir.join("/snapshots"));
-        let _ = File::create_new(&new_log_path);
+        let m = File::create_new(&new_log_path);
+        println!("{:?}",new_log_path);
+        println!("{:?}",m);
 
         let mut cur_f = File::options()
             .write(true)
