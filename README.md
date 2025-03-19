@@ -1,30 +1,23 @@
-# kvs-rs
+# Ferris Log
 
-A minimal, persistent key-value store implemented in Rust, featuring a CLI interface and log-based data storage. Built for educational purposes and lightweight data storage needs.
+[![Rust](https://img.shields.io/badge/Rust-1.72%2B-orange)](https://www.rust-lang.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
-![Rust](https://img.shields.io/badge/Rust-1.72%2B-orange)
-![License](https://img.shields.io/badge/License-MIT-blue)
+A persistent, log-structured key-value store implemented in Rust with a friendly CLI interface. Designed for reliability, simplicity, and educational purposes.
+
 
 ## Features
 
-### Existing
-
-- **CRUD Operations**: `set`, `get`, and `rm` commands
-- **Persistence**: Operations logged to `log.txt` (JSON format)
-- **Crash Recovery**: Rebuilds state from log file on startup
-- **CLI Interface**: Built with `clap` for command parsing
-- **Error Handling**: Custom error types for storage operations
-
-### Planned
-- **Multi Threaded Operations**
-- **Server and client KVS**
-- **Time-To-Live**
-- **Snapshotting**
+- **Core Operations**: Set, get, and remove key-value pairs with easy commands
+- **Persistence**: All operations are logged as JSON to survive program restarts
+- **Log Compaction**: Automatic compaction when log size exceeds threshold
+- **Snapshots**: Create and load snapshots for backup and recovery
+- **Command Line Interface**: Built with `clap` for intuitive command parsing
 
 ## Installation
 
 ```bash
-# Clone repository
+# Clone the repository
 git clone https://github.com/yourusername/kvs-rs.git
 cd kvs-rs
 
@@ -33,45 +26,87 @@ cargo build --release
 
 # Install globally
 cargo install --path .
-
+```
 
 ## Usage
 
-### Basic Commands
+### Basic Operations
 
 ```bash
-# Set key-value pair
+# Set a key-value pair
 kvs set username ferris
+# Output: Key set successfully
 
-# Get value
-kvs get username  # Output: "ferris"
+# Get the value for a key
+kvs get username
+# Output: ferris
 
-# Remove key
+# Remove a key
 kvs rm username
+# Output: Key removed successfully
 
-# Attempt to get removed key
-kvs get username  # Output: "Key not found"
+# Try to get a non-existent key
+kvs get username
+# Output: Key not found
 ```
 
-### File Structure
+### Advanced Features
+
+```bash
+# List all keys in the store
+kvs list_key
+# Output: Keys: config, username, settings, 
+
+# Count the number of keys
+kvs count
+# Output: 3
+
+# Create a snapshot (backup)
+kvs create_snapshot
+# Output: Snapshot Created at /path/to/snapshots/log_2025-03-19_14-30-00.txt
+
+# Load a snapshot
+kvs load_snapshot /path/to/snapshots/log_2025-03-19_14-30-00.txt
+# Output: Snapshot Loaded
+```
+
+## Implementation Details
+
+### Storage Architecture
+
+KVS-RS uses a log-structured storage model:
+
+1. All operations (set, remove) are appended to a log file
+2. An in-memory hash map tracks positions of the latest value for each key
+3. On startup, the store rebuilds its state by replaying the log
+4. Periodic compaction removes redundant entries to keep the log size manageable
+
+## File Structure
 
 ```
 .
 ├── Cargo.toml
 ├── src/
-│   ├── lib.rs        # Core library
-│   ├── kvstore/      # Storage implementation
-│   │   ├── mod.rs
-│   │   ├── command.rs
-│   │   └── error.rs
-│   └── kvs.rs        # CLI entry point
-└── log.txt           # Persistent command log
+│   ├── lib.rs              # Library entrypoint
+│   ├── kvstore/            # Core implementation
+│   │   ├── mod.rs          # KvStore implementation
+│   │   ├── command.rs      # Command definitions
+│   │   └── error.rs        # Custom error types
+│   └── kvs.rs              # CLI entrypoint
+└── log.txt                 # Persistent data store
 ```
 
-## Contributing
+## Performance Considerations
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amzing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+- **Log Compaction**: Automatically triggers when log exceeds 1024 bytes
+- **Memory Usage**: Keeps only key pointers in memory, not values
+- **Recovery**: Rebuilds state on startup by replaying the log
+
+## Future Enhancements
+
+- Multi-threaded operations for better performance
+- Client-server architecture with network support
+- Time-to-live (TTL) for keys
+- Enhanced snapshot management
+- Transactional support
+

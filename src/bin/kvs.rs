@@ -54,9 +54,11 @@ fn main() {
                     exit(1);
                 }
             }
+            println!("Key removed succesfully");
         }
         Commands::set { key, val } => {
             let _ = store.set(key.to_string(), val.to_string());
+            println!("Key set succesfully");
         },
         Commands::list_key => {
             store.list_key();
