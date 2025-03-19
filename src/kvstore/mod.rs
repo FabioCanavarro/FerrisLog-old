@@ -207,10 +207,11 @@ impl KvStore {
             .open(&self.path)
             .unwrap();
         
-        let new_log_path: PathBuf = parent_dir.join(format!("/snapshots/log{}.txt", cur_date));
+        let new_log_path: PathBuf = parent_dir.join("snapshots").join(format!("log_{}.txt", cur_date.format("%Y-%m-%d_%H-%M-%S").to_string()));
 
-        let _  = create_dir(parent_dir.join("/snapshots"));
-        let m = File::create_new(&new_log_path);
+        let _  = create_dir(parent_dir.join("snapshots"));
+        let m = File::create(new_log_path.clone());
+        println!("{:?}",parent_dir.join("snapshots"));
         println!("{:?}",new_log_path);
         println!("{:?}",m);
 
@@ -230,6 +231,7 @@ impl KvStore {
         Ok(())
 
     }
+
 
 
 
