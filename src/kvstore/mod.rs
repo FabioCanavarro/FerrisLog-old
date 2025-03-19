@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap, env::home_dir, fmt::format, fs::{self, create_dir, File}, io::{BufRead, BufReader, Read, Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr, vec
+    collections::HashMap, fs::{self, create_dir, File}, io::{BufRead, BufReader, Read, Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr, vec
 };
 pub mod command;
 pub mod error;
@@ -7,7 +7,6 @@ pub mod error;
 use chrono::Local;
 use command::Command;
 use error::{KvError, KvResult};
-use predicates::path;
 use tempfile::TempDir;
 
 // Consts
