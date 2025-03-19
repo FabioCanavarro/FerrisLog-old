@@ -107,6 +107,4 @@ KVS-RS uses a log-structured storage model:
 - Multi-threaded operations for better performance
 - Client-server architecture with network support
 - Time-to-live (TTL) for keys
-- Enhanced snapshot management
-- Transactional support
 
