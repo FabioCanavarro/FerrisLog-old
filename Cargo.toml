@@ -1,5 +1,5 @@
 [package]
-name = "kvs"
+name = "ferris"
 version = "0.1.0"
 description = "A key-value store"
 edition = "2018"

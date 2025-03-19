@@ -1,7 +1,7 @@
 use std::{env::current_dir, path::PathBuf, process::exit, str::FromStr};
 
 use clap::{Parser, Subcommand};
-use kvs::kvstore::KvStore;
+use ferris::kvstore::KvStore;
 
 #[derive(Parser)]
 #[command(version, about)]
