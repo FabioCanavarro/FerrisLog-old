@@ -1,5 +1,9 @@
 use std::{
-    collections::HashMap, fs::{self, create_dir, File}, io::{BufRead, BufReader, Read, Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr, vec
+    collections::HashMap,
+    fs::{self, create_dir, File},
+    io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
+    path::{Path, PathBuf},
+    str::FromStr
 };
 pub mod command;
 pub mod error;
@@ -229,6 +233,32 @@ impl KvStore {
         let _ = cur_f.write_all(buffer.as_ref());
         
         Ok(())
+
+    }
+
+    pub fn load_snapshot(&mut self, path: PathBuf) -> KvResult<()>{
+        let mut f = File::options()
+            .truncate(true)
+            .open(&self.path)
+            .unwrap();
+
+        let mut fr = File::options()
+            .read(true)
+            .open(path)
+            .unwrap();
+        
+        let mut buffer: Vec<u8> = Vec::new();
+
+        let _ = fr.read_to_end(&mut buffer);
+
+        let _ = f.write(&buffer);
+
+        Ok(())
+
+
+
+
+
 
     }
 
