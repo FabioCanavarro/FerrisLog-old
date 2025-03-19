@@ -1,4 +1,4 @@
-# Ferris Log
+# Ferris-Log
 
 [![Rust](https://img.shields.io/badge/Rust-1.72%2B-orange)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
@@ -18,8 +18,8 @@ A persistent, log-structured key-value store implemented in Rust with a friendly
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/kvs-rs.git
-cd kvs-rs
+git clone https://github.com/FabioCanavarro/FerrisLog
+cd FerrisLog
 
 # Build with Cargo
 cargo build --release
@@ -74,27 +74,12 @@ kvs load_snapshot /path/to/snapshots/log_2025-03-19_14-30-00.txt
 
 ### Storage Architecture
 
-KVS-RS uses a log-structured storage model:
+Ferris-Log uses a log-structured storage model:
 
 1. All operations (set, remove) are appended to a log file
 2. An in-memory hash map tracks positions of the latest value for each key
 3. On startup, the store rebuilds its state by replaying the log
 4. Periodic compaction removes redundant entries to keep the log size manageable
-
-## File Structure
-
-```
-.
-├── Cargo.toml
-├── src/
-│   ├── lib.rs              # Library entrypoint
-│   ├── kvstore/            # Core implementation
-│   │   ├── mod.rs          # KvStore implementation
-│   │   ├── command.rs      # Command definitions
-│   │   └── error.rs        # Custom error types
-│   └── kvs.rs              # CLI entrypoint
-└── log.txt                 # Persistent data store
-```
 
 ## Performance Considerations
 
