@@ -1,4 +1,4 @@
-use std::{env::current_dir, process::exit};
+use std::{env::current_dir, path::{self, PathBuf}, process::exit, str::FromStr};
 
 use clap::{Parser, Subcommand};
 use kvs::kvstore::KvStore;
@@ -25,7 +25,8 @@ enum Commands {
     },
     list_key,
     count,
-    create_snapshot
+    create_snapshot,
+    load_snapshot {path: String}
 }
 
 fn main() {
@@ -65,6 +66,17 @@ fn main() {
         },
         Commands::create_snapshot => {
             let _ = store.create_snapshot();
+        },
+        Commands::load_snapshot { path } => {
+            let pathb = PathBuf::from_str(path);
+            match pathb {
+                Ok(_) => (),
+                Err(e) => {
+                    println!("Path is invalid, error: {:?}",e);
+                    println!("Path inputed {}",path);
+                }
+            }
+            let _ = store.load_snapshot(pathb.unwrap());
         }
     }
 }

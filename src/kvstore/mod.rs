@@ -215,9 +215,6 @@ impl KvStore {
 
         let _  = create_dir(parent_dir.join("snapshots"));
         let m = File::create(new_log_path.clone());
-        println!("{:?}",parent_dir.join("snapshots"));
-        println!("{:?}",new_log_path);
-        println!("{:?}",m);
 
         let mut cur_f = File::options()
             .write(true)
