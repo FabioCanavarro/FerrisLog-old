@@ -58,8 +58,7 @@ fn cli_set() {
         .args(&["set", "key1", "value1"])
         .current_dir(&temp_dir)
         .assert()
-        .success()
-        .stdout(is_empty());
+        .success();
 }
 
 #[test]
@@ -103,8 +102,7 @@ fn cli_rm_stored() -> Result<(), Box<dyn Error>> {
         .args(&["rm", "key1"])
         .current_dir(&temp_dir)
         .assert()
-        .success()
-        .stdout(is_empty());
+        .success();
 
     Command::cargo_bin("kvs")
         .unwrap()

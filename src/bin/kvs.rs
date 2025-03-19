@@ -1,4 +1,4 @@
-use std::{env::current_dir, path::{self, PathBuf}, process::exit, str::FromStr};
+use std::{env::current_dir, path::PathBuf, process::exit, str::FromStr};
 
 use clap::{Parser, Subcommand};
 use kvs::kvstore::KvStore;
