@@ -1,4 +1,3 @@
-extern crate clap;
 use std::{env::current_dir, process::exit};
 
 use clap::{Parser, Subcommand};

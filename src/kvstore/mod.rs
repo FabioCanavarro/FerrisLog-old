@@ -1,9 +1,10 @@
 use std::{
-    collections::HashMap, env::home_dir, fs::{self, create_dir, File}, io::{BufRead, BufReader, Read, Seek, SeekFrom, Write}, path::{Path, PathBuf}
+    collections::HashMap, env::home_dir, fmt::format, fs::{self, create_dir, File}, io::{BufRead, BufReader, Read, Seek, SeekFrom, Write}, path::{Path, PathBuf}, str::FromStr, vec
 };
 pub mod command;
 pub mod error;
 
+use chrono::Local;
 use command::Command;
 use error::{KvError, KvResult};
 use predicates::path;
@@ -198,13 +199,34 @@ impl KvStore {
     }
     
     pub fn create_snapshot(&mut self) -> KvResult<()>{
-        let parent_dir = self.path.parent();
+
+        let binding = PathBuf::from_str("/").unwrap();
+        let parent_dir = self.path.parent().unwrap_or(binding.as_ref());
+        let cur_date :chrono::DateTime<chrono::Local> = Local::now();
         let mut f = File::options()
             .read(true)
             .open(&self.path)
             .unwrap();
+        
+        let new_log_path: PathBuf = parent_dir.join(format!("/snapshots/log{}.txt", cur_date));
 
-       create_dir(parent_dir.unwrap().join("/snapshots"));
+        let _  = create_dir(parent_dir.join("/snapshots"));
+        let _ = File::create_new(&new_log_path);
+
+        let mut cur_f = File::options()
+            .write(true)
+            .truncate(true)
+            .open(new_log_path)
+            .unwrap();
+        
+        let mut buffer = Vec::new();
+
+
+        let _  = f.read_to_end(&mut buffer);
+
+        let _ = cur_f.write_all(buffer.as_ref());
+        
+        Ok(())
 
     }
 
