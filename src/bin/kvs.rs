@@ -65,7 +65,8 @@ fn main() {
             println!("{}",store.count());
         },
         Commands::create_snapshot => {
-            let _ = store.create_snapshot();
+            let snapshot_dir = store.create_snapshot();
+            println!("Snapshot Created at {}",snapshot_dir.unwrap().to_str().unwrap());
         },
         Commands::load_snapshot { path } => {
             let pathb = PathBuf::from_str(path);
@@ -76,7 +77,9 @@ fn main() {
                     println!("Path inputed {}",path);
                 }
             }
+
             let _ = store.load_snapshot(pathb.unwrap());
+            println!("Snapshot Loaded");
         }
     }
 }

@@ -201,7 +201,7 @@ impl KvStore {
         self.table.clone().into_keys().count() as u32
     }
     
-    pub fn create_snapshot(&mut self) -> KvResult<()>{
+    pub fn create_snapshot(&mut self) -> KvResult<PathBuf>{
 
         let binding = PathBuf::from_str("/").unwrap();
         let parent_dir = self.path.parent().unwrap_or(binding.as_ref());
@@ -214,12 +214,12 @@ impl KvStore {
         let new_log_path: PathBuf = parent_dir.join("snapshots").join(format!("log_{}.txt", cur_date.format("%Y-%m-%d_%H-%M-%S").to_string()));
 
         let _  = create_dir(parent_dir.join("snapshots"));
-        let m = File::create(new_log_path.clone());
+        let _ = File::create(&new_log_path);
 
         let mut cur_f = File::options()
             .write(true)
             .truncate(true)
-            .open(new_log_path)
+            .open(&new_log_path)
             .unwrap();
         
         let mut buffer = Vec::new();
@@ -229,16 +229,17 @@ impl KvStore {
 
         let _ = cur_f.write_all(buffer.as_ref());
         
-        Ok(())
+        Ok(new_log_path)
 
     }
 
     pub fn load_snapshot(&mut self, path: PathBuf) -> KvResult<()>{
         let mut f = File::options()
             .truncate(true)
+            .write(true)
             .open(&self.path)
             .unwrap();
-
+        
         let mut fr = File::options()
             .read(true)
             .open(path)
@@ -251,12 +252,6 @@ impl KvStore {
         let _ = f.write(&buffer);
 
         Ok(())
-
-
-
-
-
-
     }
 
 
