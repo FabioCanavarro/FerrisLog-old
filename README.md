@@ -1,10 +1,9 @@
-# Ferris-Log
+# Ferrislog
 
 [![Rust](https://img.shields.io/badge/Rust-1.72%2B-orange)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 A persistent, log-structured key-value store implemented in Rust with a friendly CLI interface. Designed for reliability, simplicity, and educational purposes.
-
 
 ## Features
 
@@ -18,8 +17,8 @@ A persistent, log-structured key-value store implemented in Rust with a friendly
 
 ```bash
 # Clone the repository
-git clone https://github.com/FabioCanavarro/FerrisLog
-cd FerrisLog
+git clone https://github.com/FabioCanavarro/Ferrislog
+cd Ferrislog
 
 # Build with Cargo
 cargo build --release
@@ -51,7 +50,6 @@ kvs get username
 ```
 
 ### Advanced Features
-
 ```bash
 # List all keys in the store
 kvs list_key
@@ -73,23 +71,28 @@ kvs load_snapshot /path/to/snapshots/log_2025-03-19_14-30-00.txt
 ## Implementation Details
 
 ### Storage Architecture
-
-Ferris-Log uses a log-structured storage model:
+Ferrislog uses a log-structured storage model:
 
 1. All operations (set, remove) are appended to a log file
+
 2. An in-memory hash map tracks positions of the latest value for each key
+
 3. On startup, the store rebuilds its state by replaying the log
+
 4. Periodic compaction removes redundant entries to keep the log size manageable
 
 ## Performance Considerations
 
-- **Log Compaction**: Automatically triggers when log exceeds 1024 bytes
-- **Memory Usage**: Keeps only key pointers in memory, not values
-- **Recovery**: Rebuilds state on startup by replaying the log
+- Log Compaction: Automatically triggers when log exceeds 1024 bytes
+
+- Memory Usage: Keeps only key pointers in memory, not values
+
+- Recovery: Rebuilds state on startup by replaying the log
 
 ## Future Enhancements
 
 - Multi-threaded operations for better performance
-- Client-server architecture with network support
-- Time-to-live (TTL) for keys
 
+- Client-server architecture with network support
+
+- Time-to-live (TTL) for keys
