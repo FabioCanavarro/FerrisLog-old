@@ -11,21 +11,36 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+
 enum Commands {
+
+    #[allow(non_camel_case_types)]
     /// does testing things
     set {
         key: String,
         val: String,
     },
+
+    #[allow(non_camel_case_types)]
     get {
         key: String,
     },
+
+    #[allow(non_camel_case_types)]
     rm {
         key: String,
     },
+
+    #[allow(non_camel_case_types)]
     list_key,
+
+    #[allow(non_camel_case_types)]
     count,
+
+    #[allow(non_camel_case_types)]
     create_snapshot,
+
+    #[allow(non_camel_case_types)]
     load_snapshot {path: String}
 }
 
