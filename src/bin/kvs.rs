@@ -48,10 +48,14 @@ fn main() {
     let cli = Cli::parse();
     let mut store = KvStore::open(current_dir().unwrap().as_path()).unwrap();
 
+    if cli.command.is_none() {
+
+        Cli::parse_from(&["kvs", "--help"]);
+        return;
+    }
+
     // Your implementation here
-    match &cli
-        .command
-        .expect("ERROR: There is no commands found in the following input")
+    match &cli.command.unwrap()
     {
         Commands::get { key } => {
             let val = store.get(key.to_string());
