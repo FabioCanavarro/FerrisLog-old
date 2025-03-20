@@ -15,32 +15,37 @@ struct Cli {
 enum Commands {
 
     #[allow(non_camel_case_types)]
-    /// does testing things
+    /// Set a key-value pair
     set {
         key: String,
         val: String,
     },
-
     #[allow(non_camel_case_types)]
+    /// Get the value for a key
     get {
         key: String,
     },
 
     #[allow(non_camel_case_types)]
+    /// Remove a key-value pair
     rm {
         key: String,
     },
 
     #[allow(non_camel_case_types)]
+    /// List all keys in the store
     list_key,
 
     #[allow(non_camel_case_types)]
+    /// Count the number of keys in the store
     count,
 
     #[allow(non_camel_case_types)]
+    /// Create a backup of the current database state
     create_snapshot,
 
     #[allow(non_camel_case_types)]
+    /// Load a database from a snapshot file
     load_snapshot {path: String}
 }
 
@@ -50,7 +55,7 @@ fn main() {
 
     if cli.command.is_none() {
 
-        Cli::parse_from(&["kvs", "--help"]);
+        Cli::parse_from(["kvs", "--help"]);
         return;
     }
 
