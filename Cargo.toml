@@ -24,6 +24,8 @@ slog-scope = "4.4.0"
 slog-term = "2.9.1"
 tempfile = "3.0.7"
 
-
+[[bin]]
+name= "kvs-client"
+path= "src/bin/kvs.rs"
 
 

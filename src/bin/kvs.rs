@@ -2,7 +2,7 @@ use std::{env::current_dir, io::stdout, path::PathBuf, process::exit, str::FromS
 
 use clap::{Parser, Subcommand};
 use ferris::kvstore::KvStore;
-use slog::{Drain, Logger};
+use slog::{Drain, Logger,o};
 use slog_scope::set_global_logger;
 use slog_term::PlainSyncDecorator;
 
