@@ -3,7 +3,7 @@ extern crate clap;
 extern crate serde;
 extern crate serde_json;
 
-#[macro_use(o)]
+#[macro_use(o,info)]
 extern crate slog;
 
 #[macro_use]

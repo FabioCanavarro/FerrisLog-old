@@ -413,6 +413,7 @@ dependencies = [
  "slog-scope",
  "slog-term",
  "tempfile",
+ "time",
  "walkdir",
 ]
 
