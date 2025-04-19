@@ -1,9 +1,8 @@
 use std::io::stdout;
 use std::time::SystemTime;
+
 use clap::Parser;
-use slog::{Drain, Logger,o};
-use slog_scope::set_global_logger;
-use slog_scope::info;
+use slog::{Drain, Logger,o,info};
 use slog_term::PlainSyncDecorator;
 
 #[derive(Clone,Copy)]
@@ -43,15 +42,14 @@ fn main() {
         o!("version" => "0.1")
     );
 
-    let _guard = set_global_logger(logger);
-
 
     let args = Args::parse();
 
     // Initial logging
-    info!("Application started";
-        "started_at" => format!("{:?}", SystemTime::now()););
-
+    info!(logger,
+        "Application started";
+        "started_at" => format!("{:?}", SystemTime::now())
+    );
 
     
     

@@ -2,12 +2,10 @@ extern crate chrono;
 extern crate clap;
 extern crate serde;
 extern crate serde_json;
-
-#[macro_use(o,info)]
-extern crate slog;
+extern crate slog_term; 
 
 #[macro_use]
-extern crate slog_scope;
-extern crate slog_term; 
+extern crate slog;
+
 
 pub mod kvstore;
