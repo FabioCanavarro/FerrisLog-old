@@ -64,7 +64,7 @@ fn main() {
     let mut store = KvStore::open(current_dir().unwrap().as_path()).unwrap();
 
     if cli.command.is_none() {
-        Cli::parse_from(["kvs-client", "--help"]);
+        Cli::parse_from(["kvs", "--help"]);
         return;
     }
 
