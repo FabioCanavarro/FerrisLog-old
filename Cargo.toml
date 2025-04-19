@@ -25,7 +25,11 @@ slog-term = "2.9.1"
 tempfile = "3.0.7"
 
 [[bin]]
-name= "kvs-client"
-path= "src/bin/kvs-client.rs"
+name = "kvs-client"
+path = "src/bin/kvs-client.rs"
+
+[[bin]]
+name = "kvs-server"
+path = "src/bin/kvs-server.rs"
 
 
