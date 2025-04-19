@@ -26,6 +26,6 @@ tempfile = "3.0.7"
 
 [[bin]]
 name= "kvs-client"
-path= "src/bin/kvs.rs"
+path= "src/bin/kvs-client.rs"
 
 
