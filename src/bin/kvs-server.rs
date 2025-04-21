@@ -1,5 +1,4 @@
-use std::io::stdout;
-use chrono::Local;
+use std::{io::stdout, net::{TcpListener, TcpStream}};
 use clap::Parser;
 use slog::{Drain, Logger,o,info};
 use slog_term::PlainSyncDecorator;
@@ -19,6 +18,12 @@ impl From<Engine> for String{
     }
 }
 
+fn handle_listener(stream: TcpStream){
+    todo!()
+}
+
+
+
 #[derive(Parser,Debug)]
 #[command(version, about)]
 struct Args {
@@ -31,6 +36,10 @@ struct Args {
 
 
 fn main() {
+    // Variables
+    let address = "127.0.0.1:80";
+
+
     // Structured Logging
     let plain = PlainSyncDecorator::new(stdout());
 
@@ -44,12 +53,20 @@ fn main() {
 
     let args = Args::parse();
 
+
+
     // Initial logging
     info!(logger,
         "Application started";
-        "started_at" => format!("{}", Local::now().format("%Y-%m-%d_%H-%M-%S"))
+        "started_at" => format!("{}", &address)
     );
 
+    let listener = TcpListener::bind(address).unwrap();
+
+    for stream in listener.incoming(){
+        handle_listener(stream);
+    }
+ 
     
     
 }
