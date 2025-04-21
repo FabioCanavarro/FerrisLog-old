@@ -1,6 +1,7 @@
 use std::io::stdout;
 use std::time::SystemTime;
 
+use chrono::TimeZone;
 use clap::Parser;
 use slog::{Drain, Logger,o,info};
 use slog_term::PlainSyncDecorator;
@@ -48,7 +49,7 @@ fn main() {
     // Initial logging
     info!(logger,
         "Application started";
-        "started_at" => format!("{:?}", SystemTime::now())
+        "started_at" => format!("{}", Local::now().format!("%Y-%m-%d_%H-%M-%S"))
     );
 
     
