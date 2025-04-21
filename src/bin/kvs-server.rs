@@ -1,7 +1,5 @@
 use std::io::stdout;
-use std::time::SystemTime;
-
-use chrono::TimeZone;
+use chrono::Local;
 use clap::Parser;
 use slog::{Drain, Logger,o,info};
 use slog_term::PlainSyncDecorator;
