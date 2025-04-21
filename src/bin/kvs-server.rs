@@ -49,7 +49,7 @@ fn main() {
     // Initial logging
     info!(logger,
         "Application started";
-        "started_at" => format!("{}", Local::now().format!("%Y-%m-%d_%H-%M-%S"))
+        "started_at" => format!("{}", Local::now().format("%Y-%m-%d_%H-%M-%S"))
     );
 
     
