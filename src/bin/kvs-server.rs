@@ -1,4 +1,4 @@
-use std::{env::args, io::stdout, net::{TcpListener, TcpStream}};
+use std::{io::{stdout, Read, Write}, net::{TcpListener, TcpStream}, sync::Arc};
 use clap::Parser;
 use slog::{Drain, Logger,o,info};
 use slog_term::PlainSyncDecorator;
@@ -18,8 +18,11 @@ impl From<Engine> for String{
     }
 }
 
-fn handle_listener(stream: TcpStream){
-    todo!()
+fn handle_listener(stream: &mut TcpStream){
+    let mut buf: String = String::new();
+    let _ = stream.read_to_string(&mut buf);
+    let _ = stream.flush();
+    println!("{}",buf);
 }
 
 
@@ -54,13 +57,13 @@ fn main() {
     // Initial logging
     info!(logger,
         "Application started";
-        "started_at" => format!("{}", args.1)
+        "started_at" => format!("{}", args.address)
     );
 
-    let listener = TcpListener::bind(address).unwrap();
+    let listener = TcpListener::bind(args.address).unwrap();
 
     for stream in listener.incoming(){
-        handle_listener(stream);
+        handle_listener(&mut stream.expect("Error"));
     }
  
     
