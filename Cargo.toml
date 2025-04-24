@@ -31,4 +31,8 @@ path = "src/bin/kvs-client.rs"
 name = "kvs-server"
 path = "src/bin/kvs-server.rs"
 
+[[bin]]
+name = "kvs"
+path = "src/bin/kvs.rs"
+
 

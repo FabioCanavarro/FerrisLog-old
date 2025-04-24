@@ -1,4 +1,4 @@
-use std::{env::current_dir,  process::exit, str::FromStr};
+use std::{env::current_dir, net::TcpStream, process::exit, str::FromStr};
 use clap::{Parser, Subcommand};
 use ferris::kvstore::KvStore;
 
@@ -27,7 +27,7 @@ enum Commands {
     rm { key: String },
 }
 
-fn main() {
+fn main(){
     let cli = Cli::parse();
 
     if cli.command.is_none() {
@@ -38,11 +38,11 @@ fn main() {
     // Your implementation here
     match &cli.command.unwrap() {
         Commands::get { key } => {
-            let val = Ok(key);
-            match val.unwrap() {
-                Some(d) => println!("{}", d),
-                None => println!("Key not found"),
-            }
+
+            let stream = TcpStream::connect(cli.address).expect("Cant Connect to the address");
+
+
+
         }
 
         Commands::rm { key } => {
