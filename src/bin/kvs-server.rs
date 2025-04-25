@@ -1,6 +1,6 @@
-use std::{io::{stdout, Read, Write}, net::{TcpListener, TcpStream}, sync::Arc};
-use clap::Parser;
-use slog::{Drain, Logger,o,info};
+use std::{error::Error, fmt::Display, io::{stdout, Read, Write}, net::{TcpListener, TcpStream}, sync::Arc};
+use clap::{builder::Str, Parser};
+use slog::{info, o, warn, Drain, Logger};
 use slog_term::PlainSyncDecorator;
 
 #[derive(Clone,Copy)]
@@ -8,6 +8,21 @@ enum Engine{
     Kvs,
     Sled
 }
+
+#[derive(Debug)]
+enum ServerError{
+    UnableToReadFromStream
+}
+
+impl Display for ServerError{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self{
+            ServerError::UnableToReadFromStream => writeln!(f, "Unable to read from stream"),
+        }
+    }
+}
+
+impl Error for ServerError{}
 
 impl From<Engine> for String{
     fn from(value: Engine) -> Self {
@@ -18,15 +33,19 @@ impl From<Engine> for String{
     }
 }
 
-fn handle_listener(stream: &mut TcpStream) -> String{
+fn handle_listener(stream: &mut TcpStream) -> Result<String,ServerError>{
     let mut buf: String = String::new();
-    let _ = stream.read_to_string(&mut buf);
-    let _ = stream.flush();
-    println!("{}",buf);
-    buf
+    match stream.read_to_string(&mut buf){
+        Ok(_) =>{
+            let _ = stream.flush();
+            return Ok(buf);
+
+        },
+        Err(_)=> {
+            return Err(ServerError::UnableToReadFromStream);
+        }
+    }
 }
-
-
 
 #[derive(Parser,Debug)]
 #[command(version, about)]
@@ -65,12 +84,18 @@ fn main() {
 
     for stream in listener.incoming(){
         
-        handle_listener(&mut stream.expect("Error"));
-        info!(logger,
-            "Listener Incoming",
-        );
+        let command = handle_listener(&mut stream.expect("Error"));
+
+        match command{
+            Ok(log) => info!(logger,
+                            "Incoming Message";
+                            "Command" =>  format!("{}",log)
+                ),
+
+            Err(e) => warn!(logger,
+                            "StreamError";
+                            "Error:" => format!("{}",e)
+                )
+        }
     }
- 
-    
-    
 }
