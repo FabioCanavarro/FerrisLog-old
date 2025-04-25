@@ -1,25 +1,5 @@
-use std::{error::Error, fmt::Display, io::Write, net::TcpStream, process::exit};
+use std::{error::Error, fmt::Display, io::Write, net::TcpStream, panic::panic_any, process::exit};
 use clap::{Parser, Subcommand};
-
-
-
-// Error enum
-#[derive(Debug)]
-enum ClientError{
-    UnableToWriteToStream,
-    UnableToConnectToStream
-}
-
-impl Display for ClientError{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self{
-            ClientError::UnableToWriteToStream => writeln!(f, "Unable to write to stream"),
-            ClientError::UnableToConnectToStream => writeln!(f, "Unable to connect to stream")
-        }
-    }
-}
-
-impl Error for ClientError{}
 
 // Cli Parser
 #[derive(Parser)]
@@ -59,8 +39,16 @@ fn main(){
     match &cli.command.unwrap() {
         Commands::get { key } => {
 
-            let mut stream = TcpStream::connect(cli.address).expect("Cant Connect to the address");
-            let _ = stream.write_all(format!("Get {}",key).into_bytes().as_ref());
+            let mut stream = match TcpStream::connect(cli.address){
+                Ok(stream) => {stream},
+                Err(e) => {
+                    panic!("{}",e);
+                },
+            };
+            match stream.write_all(format!("Get {}",key).into_bytes().as_ref()){
+                Ok(_) => (),
+                Err(e) => panic!("{}",e)
+            }
 
 
 
