@@ -1,4 +1,4 @@
-use std::{env::current_dir, net::TcpStream, process::exit, str::FromStr};
+use std::{env::current_dir, error::Error, io::Write, net::TcpStream, process::exit, str::FromStr};
 use clap::{Parser, Subcommand};
 use ferris::kvstore::KvStore;
 
@@ -39,14 +39,15 @@ fn main(){
     match &cli.command.unwrap() {
         Commands::get { key } => {
 
-            let stream = TcpStream::connect(cli.address).expect("Cant Connect to the address");
+            let mut stream = TcpStream::connect(cli.address).expect("Cant Connect to the address");
+            stream.write_all(format!("Get {}",key).into_bytes().as_ref());
 
 
 
         }
 
         Commands::rm { key } => {
-            let res = Ok(key);
+            let res: Result<&str, Box<dyn Error>> = Ok("s");
             match res {
                 Ok(_) => (),
                 Err(_) => {
@@ -58,8 +59,23 @@ fn main(){
         }
 
         Commands::set { key, val } => {
-            let _ = Ok((key,val));
             println!("Key set succesfully");
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

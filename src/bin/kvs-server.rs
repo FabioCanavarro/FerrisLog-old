@@ -18,11 +18,12 @@ impl From<Engine> for String{
     }
 }
 
-fn handle_listener(stream: &mut TcpStream){
+fn handle_listener(stream: &mut TcpStream) -> String{
     let mut buf: String = String::new();
     let _ = stream.read_to_string(&mut buf);
     let _ = stream.flush();
     println!("{}",buf);
+    buf
 }
 
 
@@ -63,7 +64,11 @@ fn main() {
     let listener = TcpListener::bind(args.address).unwrap();
 
     for stream in listener.incoming(){
+        
         handle_listener(&mut stream.expect("Error"));
+        info!(logger,
+            "Listener Incoming",
+        );
     }
  
     
