@@ -1,78 +1,75 @@
-use std::{error::Error, fmt::Display, io::{stdout, Read, Write}, net::{TcpListener, TcpStream}, sync::Arc};
 use clap::{builder::Str, Parser};
 use slog::{info, o, warn, Drain, Logger};
 use slog_term::PlainSyncDecorator;
+use std::{
+    error::Error,
+    fmt::Display,
+    io::{stdout, Read, Write},
+    net::{TcpListener, TcpStream},
+    sync::Arc,
+};
 
-#[derive(Clone,Copy)]
-enum Engine{
+#[derive(Clone, Copy)]
+enum Engine {
     Kvs,
-    Sled
+    Sled,
 }
 
 #[derive(Debug)]
-enum ServerError{
-    UnableToReadFromStream
+enum ServerError {
+    UnableToReadFromStream,
 }
 
-impl Display for ServerError{
+impl Display for ServerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self{
+        match self {
             ServerError::UnableToReadFromStream => writeln!(f, "Unable to read from stream"),
         }
     }
 }
 
-impl Error for ServerError{}
+impl Error for ServerError {}
 
-impl From<Engine> for String{
+impl From<Engine> for String {
     fn from(value: Engine) -> Self {
-        match value{
+        match value {
             Engine::Kvs => "Kvs".to_string(),
-            Engine::Sled => "Sled".to_string()
+            Engine::Sled => "Sled".to_string(),
         }
     }
 }
 
-fn handle_listener(stream: &mut TcpStream) -> Result<String,ServerError>{
+fn handle_listener(stream: &mut TcpStream) -> Result<String, ServerError> {
     let mut buf: String = String::new();
-    match stream.read_to_string(&mut buf){
-        Ok(_) =>{
+    match stream.read_to_string(&mut buf) {
+        Ok(_) => {
             let _ = stream.flush();
             Ok(buf)
-
-        },
-        Err(_)=> {
-            Err(ServerError::UnableToReadFromStream)
         }
+        Err(_) => Err(ServerError::UnableToReadFromStream),
     }
 }
 
-#[derive(Parser,Debug)]
+#[derive(Parser, Debug)]
 #[command(version, about)]
 struct Args {
-    #[arg(short,long)]
+    #[arg(short, long)]
     address: String,
 
     #[arg(short,long, default_value_t=String::from("Kvs"))]
-    engine: String
+    engine: String,
 }
-
 
 fn main() {
     // Structured Logging
     let plain = PlainSyncDecorator::new(stdout());
 
     let logger = Logger::root(
-            slog_term::FullFormat::new(plain)
-                .build()
-                .fuse(),
-        o!("version" => "0.1")
+        slog_term::FullFormat::new(plain).build().fuse(),
+        o!("version" => "0.1"),
     );
 
-
     let args = Args::parse();
-
-
 
     // Initial logging
     info!(logger,
@@ -82,20 +79,19 @@ fn main() {
 
     let listener = TcpListener::bind(args.address).unwrap();
 
-    for stream in listener.incoming(){
-        
+    for stream in listener.incoming() {
         let command = handle_listener(&mut stream.expect("Error"));
 
-        match command{
+        match command {
             Ok(log) => info!(logger,
-                            "Incoming Message";
-                            "Command" =>  format!("{}",log)
-                ),
+                        "Incoming Message";
+                        "Command" =>  format!("{}",log)
+            ),
 
             Err(e) => warn!(logger,
-                            "StreamError";
-                            "Error:" => format!("{}",e)
-                )
+                        "StreamError";
+                        "Error:" => format!("{}",e)
+            ),
         }
     }
 }

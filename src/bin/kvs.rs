@@ -1,6 +1,6 @@
-use std::{env::current_dir, path::PathBuf, process::exit, str::FromStr};
 use clap::{Parser, Subcommand};
 use ferris::kvstore::KvStore;
+use std::{env::current_dir, path::PathBuf, process::exit, str::FromStr};
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -18,7 +18,7 @@ enum Commands {
     /// Get the value for a key
     #[allow(non_camel_case_types)]
     get { key: String },
-    
+
     /// Remove a key-value pair
     #[allow(non_camel_case_types)]
     rm { key: String },
