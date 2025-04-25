@@ -50,7 +50,7 @@ fn main(){
                 Err(e) => panic!("{}",e)
             }
 
-            todo!()
+            // todo!()
         }
 
         Commands::rm { key } => {
@@ -64,7 +64,7 @@ fn main(){
                 Ok(_) => (),
                 Err(e) => panic!("{}",e)
             }
-            todo!()
+            // todo!()
         }
 
         Commands::set { key, val } => {
@@ -78,7 +78,7 @@ fn main(){
                 Ok(_) => (),
                 Err(e) => panic!("{}",e)
             }
-            todo!()
+            // todo!()
         }
     }
 }
