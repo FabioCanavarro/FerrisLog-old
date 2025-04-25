@@ -50,24 +50,35 @@ fn main(){
                 Err(e) => panic!("{}",e)
             }
 
-
-
+            todo!()
         }
 
         Commands::rm { key } => {
-            let res: Result<&str, Box<dyn Error>> = Ok("s");
-            match res {
+            let mut stream = match TcpStream::connect(cli.address){
+                Ok(stream) => {stream},
+                Err(e) => {
+                    panic!("{}",e);
+                },
+            };
+            match stream.write_all(format!("Rm {}",key).into_bytes().as_ref()){
                 Ok(_) => (),
-                Err(_) => {
-                    println!("Key not found");
-                    exit(1);
-                }
+                Err(e) => panic!("{}",e)
             }
-            println!("Key removed succesfully");
+            todo!()
         }
 
         Commands::set { key, val } => {
-            println!("Key set succesfully");
+            let mut stream = match TcpStream::connect(cli.address){
+                Ok(stream) => {stream},
+                Err(e) => {
+                    panic!("{}",e);
+                },
+            };
+            match stream.write_all(format!("Set {} {}",key,val).into_bytes().as_ref()){
+                Ok(_) => (),
+                Err(e) => panic!("{}",e)
+            }
+            todo!()
         }
     }
 }
