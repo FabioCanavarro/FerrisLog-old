@@ -1,6 +1,5 @@
-use std::{env::current_dir, error::Error, io::Write, net::TcpStream, process::exit, str::FromStr};
+use std::{error::Error, io::Write, net::TcpStream, process::exit};
 use clap::{Parser, Subcommand};
-use ferris::kvstore::KvStore;
 
 #[derive(Parser)]
 #[command(version, about)]

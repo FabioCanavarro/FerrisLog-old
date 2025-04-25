@@ -38,11 +38,11 @@ fn handle_listener(stream: &mut TcpStream) -> Result<String,ServerError>{
     match stream.read_to_string(&mut buf){
         Ok(_) =>{
             let _ = stream.flush();
-            return Ok(buf);
+            Ok(buf)
 
         },
         Err(_)=> {
-            return Err(ServerError::UnableToReadFromStream);
+            Err(ServerError::UnableToReadFromStream)
         }
     }
 }
