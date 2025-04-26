@@ -37,15 +37,15 @@ fn main() {
         return;
     }
 
-    // Your implementation here
+    let mut stream = match TcpStream::connect(cli.address) {
+        Ok(stream) => stream,
+        Err(e) => {
+            panic!("{}", e);
+        }
+    };
+
     match &cli.command.unwrap() {
-        Commands::get { key } => {
-            let mut stream = match TcpStream::connect(cli.address) {
-                Ok(stream) => stream,
-                Err(e) => {
-                    panic!("{}", e);
-                }
-            };
+   Commands::get { key } => {
 
             let command = Commands::get { key: key.to_string() };
             let bytes = serde_json::to_vec_pretty(&command).unwrap();
@@ -59,12 +59,6 @@ fn main() {
         }
 
         Commands::rm { key } => {
-            let mut stream = match TcpStream::connect(cli.address) {
-                Ok(stream) => stream,
-                Err(e) => {
-                    panic!("{}", e);
-                }
-            };
 
             let command = Commands::rm { key: key.to_string() };
             let bytes = serde_json::to_vec_pretty(&command).unwrap();
@@ -77,12 +71,6 @@ fn main() {
         }
 
         Commands::set { key, val } => {
-            let mut stream = match TcpStream::connect(cli.address) {
-                Ok(stream) => stream,
-                Err(e) => {
-                    panic!("{}", e);
-                }
-            };
 
             let command = Commands::set { key: key.to_string(), val: val.to_string() };
             let bytes = serde_json::to_vec_pretty(&command).unwrap();
