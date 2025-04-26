@@ -1,7 +1,7 @@
 use bincode::{config::{self, Config}, encode_to_vec};
 use clap::{Parser, Subcommand};
 use serde::Serialize;
-use std::{io::Write, net::TcpStream, u8};
+use std::{io::{Read, Write}, net::TcpStream};
 
 // Cli Parser
 #[derive(Parser)]
@@ -29,15 +29,7 @@ enum Commands {
     rm { key: String },
 }
 
-impl From<Commands> for u8{
-    fn from(value: Commands) -> Self {
-        match value{
-            Commands::set { key, val } => 0,
-            Commands::get { key } => 1,
-            Commands::rm { key } => 2
-        }
-    }
-}
+
 
 
 fn main() {
@@ -56,15 +48,16 @@ fn main() {
         }
     };
 
-    let command = cli.command.unwrap();
-
-    match &command {
+    match cli.command.unwrap() {
         Commands::set { key, val } => {
+            
+            let command = [0_u8];
 
-            let Bytecommand = u8::from(command);
-            let byteKey = encode_to_vec(val, config);
-
-
+            let bytekey = encode_to_vec(val, config).unwrap();
+            let byteval = encode_to_vec(key, config).unwrap();
+            stream.write(&command);
+            stream.write(&bytekey[..]);
+            stream.write(&byteval[..]);
         }
 
         Commands::get { key } => {

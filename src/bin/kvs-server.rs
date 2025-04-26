@@ -38,13 +38,11 @@ impl From<Engine> for String {
     }
 }
 
-fn handle_listener(stream: &mut TcpStream) -> Result<String, ServerError> {
-    let mut buf: String = String::new();
-    match stream.read_to_string(&mut buf) {
-        Ok(_) => {
-            let _ = stream.flush();
-            Ok(buf)
-        }
+fn handle_listener(stream: &mut TcpStream) -> Result<u8, ServerError> {
+    let mut buf: &[u8] = &[];
+    let _ = stream.flush();
+    match stream.read_exact(4) {
+        Ok(_) => Ok(buf),
         Err(_) => Err(ServerError::UnableToReadFromStream),
     }
 }
