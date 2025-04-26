@@ -1,6 +1,7 @@
+use bincode::{config::{self, Config}, encode_to_vec};
 use clap::{Parser, Subcommand};
 use serde::Serialize;
-use std::{io::Write, net::TcpStream};
+use std::{io::Write, net::TcpStream, u8};
 
 // Cli Parser
 #[derive(Parser)]
@@ -28,9 +29,20 @@ enum Commands {
     rm { key: String },
 }
 
+impl From<Commands> for u8{
+    fn from(value: Commands) -> Self {
+        match value{
+            Commands::set { key, val } => 0,
+            Commands::get { key } => 1,
+            Commands::rm { key } => 2
+        }
+    }
+}
+
 
 fn main() {
     let cli = Cli::parse();
+    let config = config::standard();
 
     if cli.command.is_none() {
         Cli::parse_from(["kvs", "--help"]);
@@ -44,8 +56,18 @@ fn main() {
         }
     };
 
-    match &cli.command.unwrap() {
-   Commands::get { key } => {
+    let command = cli.command.unwrap();
+
+    match &command {
+        Commands::set { key, val } => {
+
+            let Bytecommand = u8::from(command);
+            let byteKey = encode_to_vec(val, config);
+
+
+        }
+
+        Commands::get { key } => {
 
             let command = Commands::get { key: key.to_string() };
             let bytes = serde_json::to_vec_pretty(&command).unwrap();
@@ -70,15 +92,6 @@ fn main() {
             // todo!()
         }
 
-        Commands::set { key, val } => {
 
-            let command = Commands::set { key: key.to_string(), val: val.to_string() };
-            let bytes = serde_json::to_vec_pretty(&command).unwrap();
-
-            match stream.write_all(&bytes) {
-                Ok(_) => (),
-                Err(e) => panic!("{}", e),
-            }
-        }
     }
 }
