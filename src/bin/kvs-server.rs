@@ -1,4 +1,4 @@
-use clap::{builder::Str, Parser};
+use clap::Parser;
 use slog::{info, o, warn, Drain, Logger};
 use slog_term::PlainSyncDecorator;
 use std::{
@@ -6,7 +6,6 @@ use std::{
     fmt::Display,
     io::{stdout, Read, Write},
     net::{TcpListener, TcpStream},
-    sync::Arc,
 };
 
 #[derive(Clone, Copy)]

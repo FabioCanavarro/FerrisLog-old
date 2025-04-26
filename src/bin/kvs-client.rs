@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
-use std::{error::Error, fmt::Display, io::Write, net::TcpStream, panic::panic_any, process::exit};
+use serde::Serialize;
+use std::{io::Write, net::TcpStream};
 
 // Cli Parser
 #[derive(Parser)]
@@ -12,7 +13,7 @@ struct Cli {
     address: String,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Serialize)]
 enum Commands {
     #[allow(non_camel_case_types)]
     /// Set a key-value pair
@@ -26,6 +27,7 @@ enum Commands {
     #[allow(non_camel_case_types)]
     rm { key: String },
 }
+
 
 fn main() {
     let cli = Cli::parse();
@@ -44,7 +46,11 @@ fn main() {
                     panic!("{}", e);
                 }
             };
-            match stream.write_all(format!("Get {}", key).into_bytes().as_ref()) {
+
+            let command = Commands::get { key: key.to_string() };
+            let bytes = serde_json::to_vec_pretty(&command).unwrap();
+
+            match stream.write_all(&bytes) {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }
@@ -59,7 +65,11 @@ fn main() {
                     panic!("{}", e);
                 }
             };
-            match stream.write_all(format!("Rm {}", key).into_bytes().as_ref()) {
+
+            let command = Commands::rm { key: key.to_string() };
+            let bytes = serde_json::to_vec_pretty(&command).unwrap();
+
+            match stream.write_all(&bytes) {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }
@@ -73,11 +83,14 @@ fn main() {
                     panic!("{}", e);
                 }
             };
-            match stream.write_all(format!("Set {} {}", key, val).into_bytes().as_ref()) {
+
+            let command = Commands::set { key: key.to_string(), val: val.to_string() };
+            let bytes = serde_json::to_vec_pretty(&command).unwrap();
+
+            match stream.write_all(&bytes) {
                 Ok(_) => (),
                 Err(e) => panic!("{}", e),
             }
-            // todo!()
         }
     }
 }
