@@ -93,6 +93,6 @@ Ferrislog uses a log-structured storage model:
 
 - Multi-threaded operations for better performance
 
-- Client-server architecture with network support
+- Client-server architecture with network support (Moved to a new project because it is way too huge)
 
 - Time-to-live (TTL) for keys
