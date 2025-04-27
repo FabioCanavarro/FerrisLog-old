@@ -38,13 +38,10 @@ impl From<Engine> for String {
     }
 }
 
-fn handle_listener(stream: &mut TcpStream) -> Result<u8, ServerError> {
-    let mut buf: &[u8] = &[];
+fn handle_listener(stream: &mut TcpStream) -> Result<[u8;1], ServerError> {
+    let mut buf: [u8;1] = [0];
     let _ = stream.flush();
-    match stream.read_exact(4) {
-        Ok(_) => Ok(buf),
-        Err(_) => Err(ServerError::UnableToReadFromStream),
-    }
+    Ok(buf)
 }
 
 #[derive(Parser, Debug)]
@@ -82,7 +79,7 @@ fn main() {
         match command {
             Ok(log) => info!(logger,
                         "Incoming Message";
-                        "Command" =>  format!("{}",log)
+                        "Command" =>  format!("{:?}",log)
             ),
 
             Err(e) => warn!(logger,

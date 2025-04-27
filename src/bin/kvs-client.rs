@@ -55,9 +55,14 @@ fn main() {
 
             let bytekey = encode_to_vec(val, config).unwrap();
             let byteval = encode_to_vec(key, config).unwrap();
-            stream.write(&command);
-            stream.write(&bytekey[..]);
-            stream.write(&byteval[..]);
+
+            println!("{:?} {:?} {:?} {:?} {:?}",command.clone(),bytekey.len(),byteval.len(),bytekey.clone(),byteval.clone());
+
+            let _ = stream.write(&command);
+            let _ = stream.write(&bytekey.len());
+            let _ = stream.write(&byteval.len());
+            let _ = stream.write(&bytekey[..]);
+            let _ = stream.write(&byteval[..]);
         }
 
         Commands::get { key } => {
