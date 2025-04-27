@@ -1,4 +1,5 @@
 use clap::Parser;
+use ferris::kvstore::command;
 use slog::{info, o, warn, Drain, Logger};
 use slog_term::PlainSyncDecorator;
 use std::{
@@ -38,10 +39,31 @@ impl From<Engine> for String {
     }
 }
 
-fn handle_listener(stream: &mut TcpStream) -> Result<[u8;1], ServerError> {
-    let mut buf: [u8;1] = [0];
+struct Header {
+    command: u8,
+    keysize: u8,
+    valuesize: u8
+}
+
+impl Header{
+    fn new(command: u8,keysize: u8,valuesize: u8) -> Header{
+        Header { command, keysize, valuesize }
+    }
+}
+
+fn handle_listener(stream: &mut TcpStream) -> Result<Vec<u8>, ServerError> {
+    let mut buf: [u8;3] = [0,0,0];
+
     let _ = stream.flush();
-    Ok(buf)
+
+    match stream.read_exact(&mut buf){
+        Ok(_) => (),
+        Err(e) => ()
+    }
+
+    let header = Header::new(buf[0], buf[1], buf[2]);
+    let key: &[u8] = &[];
+    Ok(buf.to_vec())
 }
 
 #[derive(Parser, Debug)]
