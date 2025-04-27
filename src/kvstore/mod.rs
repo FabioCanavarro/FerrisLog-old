@@ -148,7 +148,6 @@ impl KvStore {
             pos = buffer.seek(SeekFrom::Start(pos + length as u64)).unwrap();
         }
 
-        // This is the error, cause recursive
         Ok(KvStore {
             path: path.into().join("log.txt"),
             table: hash,
@@ -204,10 +203,9 @@ impl KvStore {
         let cur_date: chrono::DateTime<chrono::Local> = Local::now();
         let mut f = File::options().read(true).open(&self.path).unwrap();
 
-        let new_log_path: PathBuf = parent_dir.join("snapshots").join(format!(
-            "log_{}.txt",
-            cur_date.format("%Y-%m-%d_%H-%M-%S").to_string()
-        ));
+        let new_log_path: PathBuf = parent_dir
+            .join("snapshots")
+            .join(format!("log_{}.txt", cur_date.format("%Y-%m-%d_%H-%M-%S")));
 
         let _ = create_dir(parent_dir.join("snapshots"));
         let _ = File::create(&new_log_path);
