@@ -59,8 +59,8 @@ fn main() {
             println!("{:?} {:?} {:?} {:?} {:?}",command.clone(),bytekey.len(),byteval.len(),bytekey.clone(),byteval.clone());
 
             let _ = stream.write(&command);
-            let _ = stream.write(&bytekey.len());
-            let _ = stream.write(&byteval.len());
+            let _ = stream.write(&[bytekey.len() as u8]);
+            let _ = stream.write(&[byteval.len() as u8]);
             let _ = stream.write(&bytekey[..]);
             let _ = stream.write(&byteval[..]);
         }
