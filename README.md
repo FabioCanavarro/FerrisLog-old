@@ -1,4 +1,7 @@
-# Ferrislog
+# Ferrislog(OLD)
+
+#### **This Repo has been archived and moved to https://github.com/FabioCanavarro/FerrisLog**
+---
 
 [![Rust](https://img.shields.io/badge/Rust-1.72%2B-orange)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Rust](https://github.com/FabioCanavarro/FerrisLog/actions/workflows/rust.yml/badge.svg)](https://github.com/FabioCanavarro/FerrisLog/actions/workflows/rust.yml) </br>
